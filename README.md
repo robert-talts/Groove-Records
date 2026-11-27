@@ -18,6 +18,17 @@ Controls: Space pauses, 1/2/3 sets the speed, A toggles Arrange mode.
 
 Tap **Walk** to control your shopkeeper. Tap the floor to walk (or use the arrow keys, and E to interact). Tap a crate to walk over and restock it, tap the counter to go back to the register, and tap the door to step out onto the canal street. Outside you can grab a stroopwafel, sit on the bench, or put up flyers on the notice board (more shoppers that month). Customers only get served while you're at the register, unless you've hired clerk bots.
 
+Further along the canal:
+
+- **The Green Canal coffeeshop:** buy a joint and smoke it (the screen goes wavy and colourful for a while), or save it for later.
+- **Vending machines:** cigarettes, Neon Fizz soda, VOLT energy drinks (walk faster for 40 seconds) and snacks.
+- **Smoke button:** appears once you have joints or cigarettes, and lets you choose which.
+- **Bicycle and motorcycle:** buy them in the Shop tab, then tap your parked ride (or press B) to ride the bike lane.
+- **The Lucky 7:** a mafia casino with a poker room, blackjack (dealer stands on 17, blackjack pays 3 to 2) and Don Vinnie's booth.
+- **Loans:** Don Vinnie lends money with zero interest (for now). Borrow or repay at his booth. If you would go bankrupt, he turns up with a rescue loan instead.
+
+Career ranks (goals completed): Garage Hopeful, Underground Upstart (3), Scene Staple (7), Cult Favourite (12), Regional Sensation (18), National Headliner (25), Galactic Superstar (33), Hall of Famer (42).
+
 ## Saving
 
 The game autosaves to your browser every in-game month, and **Continue** appears on the title screen. To back up a game or move it to another device, tap **Export save** to download a `.json` save file, then use **Import save** (or **Load save file** on the title screen) to load it.
