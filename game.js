@@ -26,7 +26,7 @@ const G=[
 const GI=Object.fromEntries(G.map(g=>[g.id,g]));
 const F=[{id:'lp',n:'Retro vinyl',mult:1,k:[[2070,.8],[2075,.6],[2080,.5],[2085,.3],[2089,.08]]},
 {id:'8t',n:'Data chip',mult:1,up:'rack8',k:[[2070,.15],[2075,.25],[2079,.12],[2082,.02],[2084,0]]},
-{id:'cas',n:'Holo-cube',mult:1,up:'cass',k:[[2070,.05],[2075,.15],[2080,.38],[2085,.6],[2089,.52]]},
+{id:'cas',n:'Cassette tape',mult:1,up:'cass',k:[[2070,.05],[2075,.15],[2080,.38],[2085,.6],[2089,.52]]},
 {id:'cd',n:'Neural plug-in',mult:1.75,up:'cdr',k:[[2082.9,0],[2084,.05],[2086,.17],[2088,.33],[2089,.4]]}];
 const U=[
 {id:'bins',n:'Extra crates',d:'+2 crate slots so you can carry more genres. Rent goes up a bit.',c:600,max:3,v:0},
@@ -36,7 +36,7 @@ const U=[
 {id:'vend',n:'Fuel & soda dispenser',d:'Sodas for humans, coolant shots for robots. Small sales all day.',c:450,v:2},
 {id:'coffee',n:'Synth-caf bar',d:'Synthetic coffee sales, and shoppers with a cup wait longer in line. Includes a barista bot.',c:1100,v:4},
 {id:'rack8',n:'Data chip rack',d:'Capture the data chip share of demand.',c:400,v:0},
-{id:'cass',n:'Holo-cube wall',d:'Capture the holo-cube share of demand.',c:700,v:0},
+{id:'cass',n:'Cassette wall',d:'A wall of retro cassette tapes. Captures cassette demand, and tape fans browse it.',c:700,v:0},
 {id:'booth',n:'Neural listening pod',d:'Preview albums straight into your brain: +7% buy chance.',c:1200,v:8},
 {id:'neon',n:'Holo sign',d:'A spinning holographic record in the window.',c:900,v:7},
 {id:'mirror',n:'Security drones',d:'Cuts shoplifting by 60%.',c:500,v:0},
@@ -212,7 +212,7 @@ function spawn(){
  if(reg){Object.assign(c,reg.look);c.reg=reg.id;c.ask=false}else if(c.kind=='human'&&Math.random()<.7)c.spr=1+(Math.random()*4|0);
  c.party=!!party;if(party)party.guests++;
  if(shoppers().length>=(party?16:10)){if(browse(c)=='buy')pay(c);return}
- let i=st.slots.indexOf(g.id);if(i<0)i=Math.random()*st.slots.length|0;const p=spot.crate(i);c.btx=p.x+(Math.random()*6-3);c.bty=p.y+Math.random()*2;
+ let i=st.slots.indexOf(g.id);if(i<0)i=Math.random()*st.slots.length|0;const p=spot.crate(i);c.btx=p.x+(Math.random()*6-3);c.bty=p.y+Math.random()*2;if(c.f.id=='cas'&&st.up.cass){c.btx=76+Math.random()*108;c.bty=97+Math.random()*2}
  if(st.up.coffee&&Math.random()<.22)go(c,'toCoffee',spot.coffee());else{c.tx=c.btx;c.ty=c.bty}
  cust.push(c)}
 function pickG(y){const gs=G.filter(g=>pop(g,y)>0),w=g=>pop(g,y)*fx('g_'+g.id);let r=Math.random()*gs.reduce((a,g)=>a+w(g),0);for(const g of gs){r-=w(g);if(r<=0)return g}return gs[0]}
@@ -330,7 +330,7 @@ const RE=[
 const SE={
 46:()=>queueEv({t:'Vinyl shortage',x:"The last petroleum plant on Earth just shut down, and vinyl is scarce. Wholesale crate costs will jump 40% for the next 8 months.",o:[{l:'Stockpile now (2 crates per bin)',f:()=>{let n=0;for(const id of st.slots)if(id&&st.cash>=crateCost()*2){st.cash-=crateCost()*2;st.stock[id]=(st.stock[id]||0)+100;n++}st.fx.push({k:'cost',v:1.4,until:st.m+8});return`Stocked up ${n} crates at the old price.`}},{l:'Ride it out',f:()=>{st.fx.push({k:'cost',v:1.4,until:st.m+8});return'Crates cost 40% more for 8 months.'}}]}),
 89:()=>{const b=band();queueEv({t:'Gridpunk comes to town',x:`A hacker band called ${b} wants to play a very loud set in your shop, broadcast on every hijacked billboard in the city.`,o:[{l:'Let them play',f:()=>{st.rep+=7;if(Math.random()<.35){st.cash-=350*K();return`Legendary night. Your resonators did not survive (${money(350*K())}).`}return'Legendary night. The whole grid is talking about it.'}},{l:'Not in my shop',f:()=>{st.rep-=1;return'They hacked your sign to say "SELLOUT" for a day.'}}]})},
-114:()=>{toast('Holo-cube players just shrank to pocket size. Holo-cubes will keep climbing.');queueEv({t:'Humans Only backlash',x:'At a Mars stadium game, a "Humans Only" stunt blew up crates of AI-made Bot-Pop. The backlash is spreading. Bot-Pop demand is about to crash.',o:[{l:'Dump the Bot-Pop bin to a wholesaler',f:()=>{const u=st.stock.disco||0;if(!u)return'You had no Bot-Pop stock. Lucky.';const g=u*lp(yF())*.45*.5;st.cash+=g;st.stock.disco=0;const i=st.slots.indexOf('disco');if(i>=0)st.slots[i]=null;return`Sold ${u} Bot-Pop records for ${money(g)}. That crate is free now.`}},{l:'Hold and hope',f:()=>'Bot-Pop crates are going to gather dust.'}]})},
+114:()=>{toast('Retro tape decks are suddenly in every hover-car. Cassette sales will keep climbing.');queueEv({t:'Humans Only backlash',x:'At a Mars stadium game, a "Humans Only" stunt blew up crates of AI-made Bot-Pop. The backlash is spreading. Bot-Pop demand is about to crash.',o:[{l:'Dump the Bot-Pop bin to a wholesaler',f:()=>{const u=st.stock.disco||0;if(!u)return'You had no Bot-Pop stock. Lucky.';const g=u*lp(yF())*.45*.5;st.cash+=g;st.stock.disco=0;const i=st.slots.indexOf('disco');if(i>=0)st.slots[i]=null;return`Sold ${u} Bot-Pop records for ${money(g)}. That crate is free now.`}},{l:'Hold and hope',f:()=>'Bot-Pop crates are going to gather dust.'}]})},
 139:()=>toast('HoloTV launched a channel that beams music holograms into homes around the clock. Holowave and Orbital acts are surging. Hologram stage unlocked.'),
 158:()=>toast('Neural plug-ins just hit stores: albums you play straight into your implants. Plug-in racks unlocked.'),
 188:()=>queueEv({t:'Neural safety hearings',x:'The World Senate is holding hearings on whether Mech Metal plug-ins overload implants. Parents are asking what you stock.',o:[{l:'Move Mech Metal behind the counter',f:()=>{st.rep+=4;st.fx.push({k:'metal',v:.7,until:st.m+6});return'Parents are happy. Mech Metal sales dip for 6 months.'}},{l:'Keep it on the floor',f:()=>{st.rep-=2;st.fx.push({k:'visits',v:1.06,until:st.m+6});return'Some parents grumble, but Mech Metal fans flock to you.'}}]}),
@@ -480,9 +480,10 @@ function person(x,y,o){const s=o.moving?((o.walk*7|0)%2):0;x=Math.round(x);y=Mat
  if(o.apron)R(x-2,y-8,4,4,'#e8f4ff');
  if(o.arm)R(x+3,y-10-((tP*8|0)%2),2,1,k=='human'?o.skin:MET);
  }
- if(o.st=='dig'&&(tP*2.5+x*.37)%1<.55)sleeve(x-3,y-11,o.g.c,x|0);
- if(o.carry==1){sleeve(x+3,y-9,'#111',1);sleeve(x+2,y-8,o.g.c,0)}
- else if(o.carry==2){R(x+4,y-9,1,2,o.g.c);R(x+6,y-9,1,2,'#111');shopBag(x+3,y-8)}
+ const tp=o.f&&o.f.id=='cas';
+ if(o.st=='dig'&&(tP*2.5+x*.37)%1<.55)media(tp,x-3,y-9,o.g.c);
+ if(o.carry==1)media(tp,x+4,y-6,o.g.c);
+ else if(o.carry==2){media(tp,x+6,y-8,o.g.c);shopBag(x+3,y-8)}
  if(o.cup){R(x-6,y-8,2,3,'#e8f4ff');R(x-6,y-8,2,1,'#4ff3ff')}else if(o.can){R(x-6,y-8,2,3,bot?'#4ff3ff':'#ff4f6a');R(x-6,y-7,2,1,'#fff')}}
 function drone(c){const x=Math.round(c.x),y=Math.round(c.y)-14+Math.round(Math.sin(tP*6)),b=(tP*12|0)%2;
  R(x-3,Math.round(c.y),6,1,'rgba(0,0,0,.35)');if(c.carry==3){R(x-3,y+3,6,5,'#b98a52');R(x-3,y+5,6,1,'#8a6238');R(x,y+2,1,1,MET)}
@@ -557,6 +558,7 @@ function draw(){
  R(1,67,62,3,'#c8d0dc');[[8,'#ff4f6a'],[12,'#ffb24f'],[16,'#ffe24f'],[20,'#ff4f6a'],[44,'#ff8a3d'],[48,'#ff4f6a'],[52,'#ffe24f']].forEach(([px,c])=>{R(px,63,1,4,'#3a8a4a');R(px-1,61,3,2,c)});R(6,66,18,1,'#7a4a3a');R(42,66,13,1,'#7a4a3a');
  if(u.video){const b=Math.sin(tP*6),gx=32+Math.round(Math.sin(tP*1.5)*3);R(24,46,20,2,'#3a4458');R(30,45,8,1,'#4ff3ff');cx.fillStyle='rgba(79,243,255,.12)';cx.beginPath();cx.moveTo(30,45);cx.lineTo(18,14);cx.lineTo(50,14);cx.lineTo(38,45);cx.fill();
   const hc=(tP*10|0)%9?'rgba(120,240,255,.85)':'rgba(255,120,240,.85)';R(gx-2,18,4,4,hc);R(gx-3,22,6,9,hc);R(gx-5+(b>0?0:1),22+(b>0?-2:0),2,6,hc);R(gx+3-(b>0?1:0),22+(b>0?0:-2),2,6,hc);R(gx-3,31,2,9,hc);R(gx+1,31,2,9,hc);for(let yy=16;yy<42;yy+=3)R(gx-6,yy,12,1,'rgba(5,6,12,.35)')}
+ if(u.cass)tapeWall(E);
  if(u.fish&&!spr('fish'+((tP*4|0)%6),194,42)){R(194,42,30,25,'#2a3446');R(196,44,26,19,'#2a4aa0')}
  if(u.stereo)for(const x of [64,190]){const p=Math.abs(Math.sin(tP*8))*2|0;R(x,24,7,13,'#141824');R(x+1,26-p/2,5,4+p/2,'#3a4458');R(x+2,27,3,2,E.n);R(x+1,31,5,4,'#3a4458');R(x+2,32,3,2,E.n)}
  R(222,26,32,62,'#2a3446');canalView(225,29,26,38,f);
@@ -565,14 +567,14 @@ function draw(){
  if(u.disco){R(204,0,9,4,'#3a4458');R(207,4,3,2,'#c8d0dc');const hot2=pop(GI.disco,y)>.5;cx.lineWidth=1;for(let i=0;i<4;i++){const ang=Math.sin(tP*(1+i*.3)+i*1.7);cx.strokeStyle=['rgba(255,79,216,.45)','rgba(198,255,79,.45)','rgba(79,243,255,.45)','rgba(255,178,79,.45)'][i];cx.beginPath();cx.moveTo(208.5,6);cx.lineTo(208+ang*150,144);cx.stroke()}if(hot2)for(let i=0;i<10;i++){const x=(i*41+tP*40)%256,yy=(i*53)%60+88;R(x,yy,1,1,i%2?'#ff4fd8':'#c6ff4f')}}
  const items=[],h=queue[0],paying=h&&h.st=='pay',pr=paying?serveT/serveDur():0,th=things();
  for(const o of th)items.push({b:o.y+o.h,f:()=>DRAW[o.k](o)});
- items.push({b:107,f:()=>{if(!walkOn)person(26,96,OWN);for(let i=0;i<st.staff.clerk;i++)person(36+i*8,96,CLK[i]);
+ items.push({b:107,f:()=>{if(!walkOn)person(26,93,OWN);for(let i=0;i<st.staff.clerk;i++)person(36+i*8,96,CLK[i]);
   R(4,90,58,3,'#c8d0dc');R(4,93,58,14,'#1c2232');spr('plant1',3,82);R(4,104,58,1,ERA[e].n);for(let x=10;x<62;x+=12)R(x,95,6,1,'#2a3446');
   R(9,81,12,9,'rgba(79,243,255,.25)');R(9,81,12,1,'#4ff3ff');R(14,88,2,2,'#7a8aa0');R(10,83,10,1,paying&&(tP*6|0)%2?'#c6ff4f':'#4ff3ff');R(10,85,6,1,'#4ff3ff');
   if(paying&&pr>.85){R(18,86,2,2,'#c6ff4f');R(9,89,12,1,'#c6ff4f')}
   if(st.staff.dj){R(45,87,10,3,'#2a3446');R(47,86,6,1,'#111');R(49,86,2,1,['#ff4fd8','#4ff3ff'][(tP*6|0)%2])}
   if(u.lava){R(56,88,5,2,'#3a4458');R(56,82,5,6,'rgba(180,140,255,.35)');const a=tP*9;R(58,85,1,1,'#fff');R(58+Math.round(Math.cos(a)*2),85+Math.round(Math.sin(a)*2),1,1,'#ff4fd8')}}});
  items.push({b:107.5,f:()=>{if(paying&&atReg())bagging(h,pr)}});
- if(walkOn)items.push({b:pl.y,f:()=>person(pl.x,pl.y,{...OWN,moving:pl.moving,walk:pl.walk,face:pl.moving?pl.face:0})});
+ if(walkOn)items.push({b:pl.y,f:()=>person(pl.x,pl.y<99?pl.y-3:pl.y,{...OWN,moving:pl.moving,walk:pl.walk,face:pl.moving?pl.face:0})});
  petInit();items.push({b:BOWL.dog.y+2,f:bowls});for(const p of pets)items.push({b:p.y,f:()=>drawPet(p)});
  for(const c of cust)if(!c.hide)items.push({b:c.y,f:()=>c.del?drone(c):person(c.x,c.y-(c.st=='dance'?Math.abs(Math.sin(tP*9+c.x))*2:0)-(c.st=='bean'?3:0),{...c,style:c.style||c.g.hair})});
  items.sort((a,b)=>a.b-b.b).forEach(i=>i.f());
@@ -700,14 +702,21 @@ $('#impF').addEventListener('change',e=>{const file=e.target.files&&e.target.fil
   if(cut)endCut();st=s;party=null;walkOn=false;scene='in';cust=[];queue=[];floats=[];evQ=[];curEv=null;arranging=false;sel=null;if(modal)ovClose();paused=!!st.over;save();toast(`Loaded ${st.name}, ${dateStr(st.m)}.`,1);renderTab()};
  rd.readAsText(file)});
 /* ---------- records: sleeves, bags, the record wall ---------- */
-function sleeve(x,y,c,d){R(x,y,5,5,c);if(d%2){R(x+1,y+1,3,3,'#111');Rf(x+2,y+2,1,1,c)}else{R(x,y+3,5,1,'#111');Rf(x+1,y+1,1,1,'rgba(255,255,255,.5)')}Rf(x,y,5,T,'rgba(255,255,255,.35)');Rf(x+5,y+T,T,5,'rgba(0,0,0,.4)')}
+function disc(x,y,c,r=2.5){cx.fillStyle='#0c0c10';cx.beginPath();cx.arc(x,y,r,0,7);cx.fill();cx.strokeStyle='rgba(255,255,255,.22)';cx.lineWidth=T;cx.beginPath();cx.arc(x,y,r*.7,0,7);cx.stroke();cx.fillStyle=c;cx.beginPath();cx.arc(x,y,r*.4,0,7);cx.fill();cx.fillStyle='#000';cx.fillRect(x-T/2,y-T/2,T,T);Rf(x-r*.55,y-r*.6,T,T,'rgba(255,255,255,.55)')}
+function tape(x,y,c){R(x,y,6,4,'#1c1c24');Rf(x+T,y+T,6-T*2,1+T,c);Rf(x+1+T,y+2,1,1,'#d8d8e0');Rf(x+3+T*2,y+2,1,1,'#d8d8e0');Rf(x+2+T,y+2+T,1+T,T,'#555');Rf(x,y,6,T,'rgba(255,255,255,.3)')}
+const media=(tp,x,y,c)=>tp?tape(x-3,y-2,c):disc(x,y,c);
 function shopBag(x,y){Rf(x+1,y-2,T,2,'#9aa6b8');Rf(x+5-T,y-2,T,2,'#9aa6b8');Rf(x+1,y-2,4,T,'#9aa6b8');R(x,y,6,7,'#e8f4ff');Rf(x+5,y,1,7,'rgba(0,0,0,.18)');R(x+1,y+2,4,3,'#ff4fd8');Rf(x+2,y+3,2,1,'#e8f4ff')}
-function bagging(h,pr){const n=Math.min(4,Math.max(1,Math.ceil(h.qty/2))),c=h.g.c,p2=Math.min(1,pr/.8),done=Math.min(n,Math.floor(p2*n)),m=p2*n-done,BX=40+(pr>.85?(pr-.85)/.15*14:0),BY=83;
- const left=n-done-(done<n?1:0);for(let j=0;j<left;j++){R(30,88-j*2,7,2,j%2?c:'#111');Rf(30,88-j*2,7,T,'rgba(255,255,255,.25)')}
- for(let k=0;k<done;k++)R(BX+1+k,BY-1,1,2,k%2?'#111':c);
+function bagging(h,pr){const n=Math.min(4,Math.max(1,Math.ceil(h.qty/2))),c=h.g.c,tp=h.f&&h.f.id=='cas',p2=Math.min(1,pr/.8),done=Math.min(n,Math.floor(p2*n)),m=p2*n-done,BX=35+(pr>.85?(pr-.85)/.15*18:0),BY=83,S={x:30,y:88};
+ const left=n-done-(done<n?1:0);
+ for(let j=0;j<left;j++){if(tp){R(30,88-j*2,5,2,'#1c1c24');Rf(31,88-j*2,3,T,c)}else{R(30,89-j,5,1,'#0c0c10');Rf(32,89-j,1,T,c)}}
+ for(let k=0;k<done;k++)media(tp,BX+2+k*.8,BY+(tp?0:.5),c);
  shopBag(BX,BY);
- let hx,hy;if(done<n){const sx=31,sy=88-left*2-3,ex=BX+.5,ey=BY-4;hx=sx+(ex-sx)*m;hy=sy+(ey-sy)*m-Math.sin(m*Math.PI)*4;sleeve(hx,hy,c,left);hx+=1;hy+=3}else{hx=BX-1;hy=BY+1}
- const steps=Math.ceil(Math.hypot(hx-29,hy-88)*SC);for(let i=0;i<=steps;i++){const t=i/steps;Rf(29+(hx-29)*t,88+(hy-88)*t,2*T,2*T,OWN.skin)}R(Math.round(hx),Math.round(hy),1,1,OWN.skin)}
+ let hx=32,hy=89;if(done<n){const sx=32,sy=tp?86-left*2:87-left,ex=BX+3,ey=BY-2;hx=sx+(ex-sx)*m;hy=sy+(ey-sy)*m-Math.sin(m*Math.PI)*1.5;media(tp,hx,hy,c);hy+=1}else if(pr<=.85){hx=BX;hy=BY+2}
+ const d=Math.hypot(hx-S.x,hy-S.y),k2=Math.min(1,4/Math.max(d,.01)),ex2=S.x+(hx-S.x)*k2,ey2=S.y+(hy-S.y)*k2,steps=Math.ceil(d*k2*SC)+1;
+ for(let i=0;i<=steps;i++){const t=i/steps;Rf(S.x+(ex2-S.x)*t,S.y+(ey2-S.y)*t,2*T,2*T,OWN.skin)}Rf(ex2-T,ey2-T,1,1,OWN.skin)}
+function tapeWall(E){const sl=st.slots.filter(Boolean),pal=sl.length?sl.map(id=>GI[id].c):['#ff4fd8','#4ff3ff'],X=['#ff4fd8','#4ff3ff','#c6ff4f','#ffb24f','#e8f4ff','#b48cff'];
+ R(68,71,124,16,'#0c1020');R(68,71,124,T,E.n);Rf(68,87-T,124,T,'rgba(79,243,255,.4)');
+ for(let r=0;r<2;r++){R(69,77+r*8,122,1,'#3a4458');for(let i=0;i<19;i++){const x=71+i*6.3,c=(i+r*3)%4==0?pal[(i+r)%pal.length]:X[(i*5+r*2+st.m)%X.length];tape(Math.round(x*3)/3,72+r*8,c)}}}
 function wallAlbs(){const y=Math.floor(yF()),sl=st.slots.filter(Boolean),all=ALB.map((x,i)=>i).filter(i=>ALB[i][2]<=y),a=all.filter(i=>sl.includes(ALB[i][3]));return a.length>=4?a:all}
 function cover(x,y,s,i,v){const c=GI[ALB[i][3]].c,d=(v+i)%6,dk='#141824',bg=d%2?dk:c,fg=d%2?c:dk;
  if(v%3==0){R(x+2,y-2,s-4,2,'#111');Rf(x+3,y-2+T,s-6,T,'#333')}
