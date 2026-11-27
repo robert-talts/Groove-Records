@@ -1,0 +1,82 @@
+/* VOICE: playful 8-bit shop sim, warm and a bit cheeky
+ IDEA: a chrome-and-neon arcade cabinet with a 2070s megacity record shop inside it
+ PICTURE: live pixel shopfront, customers digging crates, wallpaper changing by era
+ COLOUR and TYPE: midnight navy, cyan, magenta, acid green; Press Start 2P for labels, VT323 for text
+ LAYOUT: cabinet (HUD, screen) then a tabbed ledger panel below */
+:root{color-scheme:dark;--bg:#070912;--wood:#141a2e;--wood2:#1e2742;--ink:#e8f4ff;--dim:#93a8cc;--or:#ff4fd8;--mu:#4ff3ff;--te:#c6ff4f;--pk:#ff4fd8;--gr:#5dff9a;--bad:#ff5a6a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:21px/1.25 VT323,ui-monospace,monospace;overflow-x:clip}
+.top{background:linear-gradient(180deg,#05060c 0 8px,#ff4fd8 8px 10px,#05060c 10px 18px,#4ff3ff 18px 20px,#05060c 20px 28px,#c6ff4f 28px 29px,#0b0f24 29px);padding:52px max(5vw,16px) 0}
+.top .in{background:var(--bg);max-width:1000px;margin:0 auto;padding:22px 22px 6px;border-radius:14px 14px 0 0}
+h1{font:clamp(20px,4.6vw,36px)/1.15 "Press Start 2P",monospace;margin:0;color:var(--mu);text-shadow:3px 3px 0 #ff4fd8,6px 6px 0 #2a1060,0 0 18px rgba(79,243,255,.6);text-wrap:balance}
+.top p{margin:12px 0 0;color:var(--dim);font-size:22px}
+.wrap{max-width:1000px;margin:0 auto;padding:10px max(3vw,10px) 40px;display:grid;gap:16px}
+.cab{background:linear-gradient(180deg,#1a2238,#0e1222);border-radius:16px;padding:12px;box-shadow:0 0 0 2px #4ff3ff55,0 0 0 4px #05060c,0 0 28px rgba(255,79,216,.25),0 14px 30px rgba(0,0,0,.6)}
+.hud{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-bottom:8px}
+.stat{background:#070912;border:2px solid #000;border-radius:6px;padding:4px 10px;display:flex;flex-direction:column;justify-content:center;min-width:86px}
+.stat span{font-size:16px;color:var(--dim)}
+.stat b{font:13px/1.4 "Press Start 2P",monospace;color:var(--mu);white-space:nowrap}
+#hCash.neg{color:var(--bad)}
+.spd{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.prog{height:6px;background:#070912;border-radius:3px;margin-bottom:8px;overflow:hidden}.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--or),var(--mu))}
+.screen{position:relative;aspect-ratio:16/9;background:#000;border:6px solid #05060c;border-radius:8px;overflow:hidden}
+.screen canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#toast{position:absolute;left:8px;right:8px;top:8px;display:flex;flex-direction:column;gap:4px;pointer-events:none}
+#toast div{background:rgba(20,11,5,.9);border:2px solid var(--mu);padding:4px 10px;border-radius:4px;font-size:19px;animation:pop .25s ease-out}
+@keyframes pop{from{transform:translateY(8px);opacity:0}}
+@media(prefers-reduced-motion:reduce){#toast div{animation:none}}
+button,select,input{font:20px/1 VT323,monospace;color:var(--ink)}
+button{min-height:44px;padding:0 14px;background:#1e2742;border:2px solid #000;border-radius:4px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.35),inset 3px 3px 0 rgba(255,255,255,.12)}
+button:hover{background:#2a3556}button:active{box-shadow:inset 3px 3px 0 rgba(0,0,0,.35)}
+button.on{background:var(--or);color:#070912}button.ghost{background:transparent;border-color:#2a3556}
+button:disabled{opacity:.4;cursor:not-allowed}
+select,input{min-height:44px;background:#070912;border:2px solid #2a3556;border-radius:4px;padding:0 8px;font-size:20px}
+:focus-visible{outline:3px solid var(--te);outline-offset:2px}
+.panel{background:#0e1222;border:2px solid #1e2742;border-radius:14px;padding:14px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button{font:13px/1 "Press Start 2P",monospace}
+.row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #1e2742}
+.row:last-child{border-bottom:0}
+.sw{width:22px;height:22px;border:2px solid #000;border-radius:3px}.sw.empty{background:repeating-linear-gradient(45deg,#1e2742 0 4px,#0e1222 4px 8px)}
+.nm b{display:block;font-weight:400;font-size:22px}.nm small{display:block;color:var(--dim);font-size:18px}
+.ac{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pm{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.note{color:var(--dim);margin:8px 0 6px;font-size:19px}
+.up{color:var(--gr)}.dn{color:var(--bad)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{background:#141a2e;border:2px solid #1e2742;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.card h3{margin:0;font:400 22px VT323,monospace;color:var(--mu)}.card p{margin:0;color:var(--dim);font-size:18px;flex:1}
+.card .ft{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card.own{border-color:#2f8a5a}.card.lock{opacity:.55}
+h4{font:13px/1.4 "Press Start 2P",monospace;color:var(--te);margin:16px 0 6px}
+.bars{display:grid;gap:5px}
+.bar{display:grid;grid-template-columns:9em minmax(0,1fr) 7em;gap:8px;align-items:center;font-size:19px}
+.bar .tr{background:#070912;height:14px;border-radius:2px;overflow:hidden}.bar .tr i{display:block;height:100%}
+.bar em{font-style:normal;color:var(--dim);text-align:right;white-space:nowrap}
+.log{margin:0;padding:0;list-style:none;color:var(--dim);font-size:18px}.log li{padding:2px 0}
+.foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:2px solid #1e2742}
+.ov{position:fixed;inset:0;background:rgba(10,5,2,.8);display:grid;place-items:center;padding:16px;z-index:9}
+.ov[hidden]{display:none}
+.box{max-width:540px;width:100%;max-height:90vh;overflow:auto;background:#141a2e;border:3px solid var(--mu);border-radius:10px;padding:20px;box-shadow:8px 8px 0 #000}
+.box h2{font:16px/1.5 "Press Start 2P",monospace;color:var(--mu);margin:0 0 10px}
+.box p,.box li{font-size:21px}.box ul{padding-left:20px}
+.box label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btns button{flex:1 1 auto}
+@media(max-width:600px){.row{grid-template-columns:22px minmax(0,1fr)}.ac{grid-column:1/-1;justify-content:flex-start}.spd{margin-left:0}.bar{grid-template-columns:6.5em minmax(0,1fr) 5.5em}.stat{min-width:0;flex:1 1 40%}}
+.tip{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#070912;border:2px solid var(--te);border-radius:6px;padding:4px 4px 4px 12px;margin-top:8px;font-size:19px}
+.tip[hidden]{display:none}.tip button{min-height:36px;font-size:18px}
+.pb{display:block;height:8px;background:#070912;border-radius:2px;margin-top:4px;overflow:hidden}.pb i{display:block;height:100%;background:linear-gradient(90deg,var(--or),var(--mu))}
+ol.chart{list-style:none;margin:0;padding:0;counter-reset:c}
+ol.chart li{display:grid;grid-template-columns:1.6em 22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed #1e2742;counter-increment:c}
+ol.chart li::before{content:counter(c);font:12px "Press Start 2P",monospace;color:var(--mu)}
+ol.chart b{display:block;font-weight:400}ol.chart small{display:block;color:var(--dim);font-size:17px}ol.chart em{font-style:normal;color:var(--mu);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#141a2e;border:2px solid #1e2742;border-radius:4px;padding:3px 8px;font-size:18px}
+.box select{max-width:100%}
+#arrB.on{background:var(--te)}
+.cut{position:absolute;inset:0;display:flex;align-items:flex-end;padding:10px;cursor:pointer}.cut[hidden]{display:none}
+.cbox{width:100%;background:rgba(5,6,12,.9);border:2px solid var(--mu);border-radius:6px;padding:8px 12px;box-shadow:0 0 16px rgba(79,243,255,.3)}
+.cbox b{font:12px/1.4 "Press Start 2P",monospace;color:var(--or);display:block;margin-bottom:4px}.cbox b[hidden]{display:none}
+.cbox p{margin:0;min-height:2.5em;font-size:clamp(17px,3vw,23px)}.cnext{display:block;text-align:right;font-size:16px;color:var(--dim)}
+.cskip{position:absolute;top:8px;right:8px;min-height:36px}.screen.cutting #toast{display:none}
+.box input[type=checkbox]{width:22px;height:22px;min-height:0;accent-color:var(--or)}
