@@ -22,6 +22,7 @@ Further along the canal:
 
 - **The Green Canal coffeeshop:** buy a joint and smoke it (the screen goes wavy and colourful for a while), or save it for later.
 - **Vending machines:** cigarettes, Neon Fizz soda, VOLT energy drinks (walk faster for 40 seconds) and snacks.
+- **Own the vending machines:** buy any of the 6 street machines from its menu. Busier spots cost more and earn more. Each pays out every month, owned machines get a pink Groove sticker, and snacks are free for the owner. They're listed in the Chain tab.
 - **Smoke button:** appears once you have joints or cigarettes, and lets you choose which.
 - **Bicycle and motorcycle:** buy them in the Shop tab, then tap your parked ride (or press B) to ride the bike lane.
 - **The Lucky 7:** a mafia casino with a poker room, blackjack (dealer stands on 17, blackjack pays 3 to 2) and Don Vinnie's booth.
