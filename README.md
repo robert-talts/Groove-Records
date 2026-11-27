@@ -5,6 +5,8 @@ An 8-bit record shop sim. Run a record shop in an old canal house in Amsterdam f
 - Fill crates with the genres people want. Tastes change every year (Synthwave, Bot-Pop, Gridpunk, Neuro-Rap and more).
 - Hit yearly goals, pick perks, research upgrades and climb the career ranks.
 - Arrange your shop, hire bots, add a synth-caf bar, then open branches from Neo Tokyo to Mars.
+- Look after Biscuit the shop dog and Pixel the shop cat. Feed them, pet them and rename them (Pets tab). Happy pets add vibe.
+- Throw a record store party or an album release party (Party tab). The shop goes dark, the lights come up and the crowds pour in.
 
 ## Play
 
