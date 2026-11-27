@@ -26,4 +26,9 @@ The game autosaves to your browser every in-game month, and **Continue** appears
 
 - `index.html`: page layout
 - `style.css`: styles
+- `sprites.png`: the pixel-art sprites the game uses (see Credits)
 - `game.js`: all the game logic and pixel-art drawing. The world uses a 256×144 pixel grid, drawn at 3× (768×432) so lighting, shading and fine details can sit between the big pixels.
+
+## Credits
+
+Character, prop and neon sign sprites are from the **Cyberpunk / Sci-Fi City Exterior 16x16 Tileset** and **Cyberpunk Interiors 16x16** by [BeeZeeBox](https://beezeebox.itch.io/), used under the pack license (free for personal and commercial use, editing allowed). Only the pieces the game uses are included, combined into `sprites.png`. The original asset packs are not redistributed here. Get them from the artist's itch.io page.
