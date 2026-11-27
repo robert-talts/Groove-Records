@@ -14,6 +14,10 @@ Open `index.html` in a browser. No build step and no dependencies. Fonts load fr
 
 Controls: Space pauses, 1/2/3 sets the speed, A toggles Arrange mode.
 
+## Walk mode
+
+Tap **Walk** to control your shopkeeper. Tap the floor to walk (or use the arrow keys, and E to interact). Tap a crate to walk over and restock it, tap the counter to go back to the register, and tap the door to step out onto the canal street. Outside you can grab a stroopwafel, sit on the bench, or put up flyers on the notice board (more shoppers that month). Customers only get served while you're at the register, unless you've hired clerk bots.
+
 ## Saving
 
 The game autosaves to your browser every in-game month, and **Continue** appears on the title screen. To back up a game or move it to another device, tap **Export save** to download a `.json` save file, then use **Import save** (or **Load save file** on the title screen) to load it.

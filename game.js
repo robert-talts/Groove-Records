@@ -170,7 +170,7 @@ function setMusic(on){music=on;if(on){ensureAC();if(!mT){mNext=0;mT=setInterval(
 /* ---------- toasts ---------- */
 function toast(msg,nolog){const el=document.createElement('div');el.textContent=msg;const t=$('#toast');t.appendChild(el);while(t.children.length>3)t.firstChild.remove();setTimeout(()=>el.remove(),4500);if(nolog)return;st.log.unshift(MON.some(m=>msg.startsWith(m))?msg:dateStr(st.m)+': '+msg);st.log.length=Math.min(st.log.length,12)}
 const TIPS=[[()=>st.flags.ans,'Shoppers with a gold ? have a question. Tap them to help, and they buy more.'],[()=>st.flags.crate,'Crates run out fast. In the Stock tab, tap "+1 crate" to restock.'],[()=>st.slots.filter(Boolean).length>=3,'Put another genre in an empty crate. The Charts tab shows what\'s hot.'],[()=>Object.keys(st.up).length>0,'Buy something in the Shop tab to draw bigger crowds.'],[()=>st.flags.goals,'Open the Goals tab to see this year\'s targets.'],[()=>st.flags.tap,'Tap a shopper on screen to see what they want.'],[()=>st.flags.arr,'Tap Arrange to move crates and furniture around.'],[()=>st.res.cur||st.res.done.length,'Open the Research tab and start your first project.']];
-function tipUI(){const el=$('#tip');if(arranging){el.hidden=false;$('#tipT').textContent=sel?'Now tap an empty floor spot to move it there.':'Tap a crate or piece of furniture to pick it up.';return}
+function tipUI(){const el=$('#tip');if(walkOn&&!arranging){el.hidden=false;$('#tipT').textContent=walkTip();return}if(arranging){el.hidden=false;$('#tipT').textContent=sel?'Now tap an empty floor spot to move it there.':'Tap a crate or piece of furniture to pick it up.';return}
  const t=st.tips&&TIPS.find(t=>!t[0]());el.hidden=!t;if(t)$('#tipT').textContent=t[1]}
 
 /* ---------- customers ---------- */
@@ -244,7 +244,7 @@ function sim(dt){
   case'out':if(at)c.dead=true;break}}
  const h=queue[0];
  if(h&&h.st=='q'&&Math.hypot(h.x-h.tx,h.y-h.ty)<1.5){h.st='pay';serveT=0}
- if(h&&h.st=='pay'){serveT+=dt;if(serveT>=serveDur()){queue.shift();pay(h);h.carry=2;floats.push({x:h.x,y:h.y-22,t:'+'+Math.round(h.amt),c:'#7dff6a',life:1.8});if(st.up.vend&&Math.random()<.15){go(h,'toVend',spot.vend());h.bub='h';h.bt=1.5}else leave(h,'h');serveT=0}}
+ if(h&&h.st=='pay'&&atReg()){serveT+=dt;if(serveT>=serveDur()){queue.shift();pay(h);h.carry=2;floats.push({x:h.x,y:h.y-22,t:'+'+Math.round(h.amt),c:'#7dff6a',life:1.8});if(st.up.vend&&Math.random()<.15){go(h,'toVend',spot.vend());h.bub='h';h.bt=1.5}else leave(h,'h');serveT=0}}
  cust=cust.filter(c=>!c.dead);
  for(const f of floats){f.y-=7*dt;f.life-=dt}floats=floats.filter(f=>f.life>0);
  st.rep=Math.max(0,Math.min(100,st.rep));
@@ -350,7 +350,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 
 /* ---------- UI ---------- */
 function hud(){$('#hDate').textContent=dateStr(st.m);const c=$('#hCash');c.textContent=money(st.cash);c.classList.toggle('neg',st.cash<0);$('#hRep').textContent=Math.round(st.rep);$('#hVibe').textContent=vibe();$('#hRank').textContent=rankOf(st.gDone);$('#hProg').style.width=(st.mt/MONTH*100)+'%'}
-function spdUI(){document.querySelectorAll('#spd button[data-a^=speed]').forEach(b=>{const v=+b.dataset.a.split(':')[1];b.classList.toggle('on',v==0?paused:!paused&&v==speed)});const a=$('#arrB');a.classList.toggle('on',arranging);a.textContent=arranging?'Done':'Arrange';document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.a=='tab:'+tab));$('#sndB').textContent='Sound: '+(sound?'on':'off');$('#musB').textContent='Music: '+(music?'on':'off');tipUI()}
+function spdUI(){document.querySelectorAll('#spd button[data-a^=speed]').forEach(b=>{const v=+b.dataset.a.split(':')[1];b.classList.toggle('on',v==0?paused:!paused&&v==speed)});const a=$('#arrB');a.classList.toggle('on',arranging);a.textContent=arranging?'Done':'Arrange';const wb=$('#walkB');wb.classList.toggle('on',walkOn);wb.textContent=walkOn?'Stop walking':'Walk';document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.a=='tab:'+tab));$('#sndB').textContent='Sound: '+(sound?'on':'off');$('#musB').textContent='Music: '+(music?'on':'off');tipUI()}
 function arrow(g,y){const d=pop(g,y)-pop(g,y-.5);return d>.03?'<span class="up">▲ rising</span>':d<-.03?'<span class="dn">▼ falling</span>':'steady'}
 function tStock(){const y=yF(),hs=hot(y),tot=hs.reduce((a,g)=>a+pop(g,y),0),sh=fshare(y);
  let h=`<div class="pm"><span>Pricing:</span>${['Bargain','Fair','Premium'].map((n,i)=>`<button data-a="price:${i}" class="${st.price==i?'on':''}">${n}</button>`).join('')}</div><p class="note">LP price ${'$'+(lp(y)*PM[st.price].mult).toFixed(2)} · a crate of 50 costs ${money(crateCost())}${fx('cost')>1?' (shortage!)':''}${st.staff.buyer?' · your buyer is auto-restocking':''}</p>`;
@@ -388,7 +388,7 @@ function tRes(){const k=cpi(yF()),R0=st.res;let h=`<p class="note">Research one 
 function renderTab(){if(tab=='goals')st.flags.goals=1;$('#tabc').innerHTML={stock:tStock,shop:tUp,staff:tStaff,chain:tChain,goals:tGoals,charts:tCharts,research:tRes,pets:tPets,party:tParty}[tab]();spdUI()}
 
 function buyCrate(id,n){const c=crateCost()*n;if(st.cash<c)return toast('Not enough cash for that.',1);st.cash-=c;st.stock[id]=(st.stock[id]||0)+50*n;st.flags.crate=1;delivery(id)}
-function setArr(on){arranging=on;sel=null;if(on){for(const c of cust)if(c.carry==1&&c.qty)st.stock[c.g.id]=(st.stock[c.g.id]||0)+c.qty;cust=[];queue=[];serveT=0;st.flags.arr=1}else save()}
+function setArr(on){if(on&&walkOn)toggleWalk();arranging=on;sel=null;if(on){for(const c of cust)if(c.carry==1&&c.qty)st.stock[c.g.id]=(st.stock[c.g.id]||0)+c.qty;cust=[];queue=[];serveT=0;st.flags.arr=1}else save()}
 function act(a,p){
  if(a=='speed'){if(+p==0)paused=true;else{paused=false;speed=+p}}
  else if(a=='arr')setArr(!arranging);
@@ -412,6 +412,7 @@ function act(a,p){
  else if(a=='names')st.real=!st.real;
  else if(a=='skiptip')st.tips=false;
  else if(a=='save'){save();toast('Game saved.',1)}
+ else if(a=='walkm')toggleWalk();
  else if(a=='feed'){if(p=='both'){feed('dog');feed('cat')}else feed(p)}
  else if(a=='pfeed'){ovClose();feed(p)}
  else if(a=='ppat'){if(modal)ovClose();patPet(p)}
@@ -420,7 +421,7 @@ function act(a,p){
  else if(a=='export')exportSave();
  else if(a=='import')$('#impF').click();
  else if(a=='newq'){paused=true;ovOpen(`<h2>Start over?</h2><p>Your current shop will be lost.</p><div class="btns"><button data-a="restart" class="on">New game</button><button data-a="close">Keep playing</button></div>`)}
- else if(a=='restart'){party=null;cust=[];queue=[];evQ=[];arranging=false;intro()}
+ else if(a=='restart'){party=null;walkOn=false;scene='in';cust=[];queue=[];evQ=[];arranging=false;intro()}
  else if(a=='close')ovClose();
  else if(a=='start'){const v=($('#nmI').value||'').trim().slice(0,14),ow=($('#ownI').value||'').trim().slice(0,12)||'Max',pc=$('#cutI').checked;st=fresh(v||'Groove Records',$('#styI').value,$('#difI').value);st.owner=ow;newYear();cust=[];queue=[];floats=[];ovClose();if(pc){paused=true;startCut()}else beginGame()}
  else if(a=='cont'){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v==6)st=s}catch(e){}cust=[];queue=[];ovClose();paused=false}
@@ -552,13 +553,14 @@ function draw(){
  if(u.disco){R(204,0,9,4,'#3a4458');R(207,4,3,2,'#c8d0dc');const hot2=pop(GI.disco,y)>.5;cx.lineWidth=1;for(let i=0;i<4;i++){const ang=Math.sin(tP*(1+i*.3)+i*1.7);cx.strokeStyle=['rgba(255,79,216,.45)','rgba(198,255,79,.45)','rgba(79,243,255,.45)','rgba(255,178,79,.45)'][i];cx.beginPath();cx.moveTo(208.5,6);cx.lineTo(208+ang*150,144);cx.stroke()}if(hot2)for(let i=0;i<10;i++){const x=(i*41+tP*40)%256,yy=(i*53)%60+88;R(x,yy,1,1,i%2?'#ff4fd8':'#c6ff4f')}}
  const items=[],h=queue[0],paying=h&&h.st=='pay',pr=paying?serveT/serveDur():0,th=things();
  for(const o of th)items.push({b:o.y+o.h,f:()=>DRAW[o.k](o)});
- items.push({b:107,f:()=>{person(26,96,OWN);for(let i=0;i<st.staff.clerk;i++)person(36+i*8,96,CLK[i]);
+ items.push({b:107,f:()=>{if(!walkOn)person(26,96,OWN);for(let i=0;i<st.staff.clerk;i++)person(36+i*8,96,CLK[i]);
   R(4,90,58,3,'#c8d0dc');R(4,93,58,14,'#1c2232');R(4,104,58,1,ERA[e].n);for(let x=10;x<62;x+=12)R(x,95,6,1,'#2a3446');
   R(9,81,12,9,'rgba(79,243,255,.25)');R(9,81,12,1,'#4ff3ff');R(14,88,2,2,'#7a8aa0');R(10,83,10,1,paying&&(tP*6|0)%2?'#c6ff4f':'#4ff3ff');R(10,85,6,1,'#4ff3ff');
   if(paying&&pr>.85){R(18,86,2,2,'#c6ff4f');R(9,89,12,1,'#c6ff4f')}
   if(st.staff.dj){R(45,87,10,3,'#2a3446');R(47,86,6,1,'#111');R(49,86,2,1,['#ff4fd8','#4ff3ff'][(tP*6|0)%2])}
   if(u.lava){R(56,88,5,2,'#3a4458');R(56,82,5,6,'rgba(180,140,255,.35)');const a=tP*9;R(58,85,1,1,'#fff');R(58+Math.round(Math.cos(a)*2),85+Math.round(Math.sin(a)*2),1,1,'#ff4fd8')}}});
- items.push({b:107.5,f:()=>{if(paying)bagging(h,pr)}});
+ items.push({b:107.5,f:()=>{if(paying&&atReg())bagging(h,pr)}});
+ if(walkOn)items.push({b:pl.y,f:()=>person(pl.x,pl.y,{...OWN,moving:pl.moving,walk:pl.walk})});
  petInit();items.push({b:BOWL.dog.y+2,f:bowls});for(const p of pets)items.push({b:p.y,f:()=>drawPet(p)});
  for(const c of cust)if(!c.hide)items.push({b:c.y,f:()=>c.del?drone(c):person(c.x,c.y-(c.st=='dance'?Math.abs(Math.sin(tP*9+c.x))*2:0)-(c.st=='bean'?3:0),{...c,style:c.style||c.g.hair})});
  items.sort((a,b)=>a.b-b.b).forEach(i=>i.f());
@@ -567,7 +569,7 @@ function draw(){
  if(arranging){R(0,0,256,144,'rgba(0,0,0,.25)');for(const o of th){const s=sel&&sel.k==o.k&&sel.i===o.i,c=s?((tP*4|0)%2?'#fff':'#ff4fd8'):'#4ff3ff',top=o.k=='crate'?o.y-7:o.y,hh=o.y+o.h-top;R(o.x-1,top-1,o.w+2,1,c);R(o.x-1,top+hh,o.w+2,1,c);R(o.x-1,top,1,hh,c);R(o.x+o.w,top,1,hh,c)}}
  for(const c of cust)bubble(c);
  for(const p of parts)glyph('n',p.x|0,p.y|0,p.c);
- for(const fl of floats)txt(fl.t,fl.x-fl.t.length*2,fl.y|0,fl.c)}
+ for(const fl of floats)if(!fl.out)txt(fl.t,fl.x-fl.t.length*2,fl.y|0,fl.c)}
 function anim(dt){
  if(paused||modal||arranging)return;
  if((st.up.stereo||st.staff.dj)&&(noteT+=dt)>.7){noteT=0;parts.push({x:st.up.stereo?pick([67,193]):50,y:22,vx:(Math.random()-.5)*8,life:2,c:pick(['#4ff3ff','#ff4fd8','#c6ff4f'])})}
@@ -576,6 +578,7 @@ function anim(dt){
  walk(dt)}
 cv.style.cursor='pointer';
 cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*256,py=(e.clientY-r.top)/r.height*144;
+ if(scene=='out')return streetClick(px,py);
  if(arranging){const t=things().sort((a,b)=>(b.y+b.h)-(a.y+a.h)).find(o=>px>=o.x-1&&px<=o.x+o.w+1&&py>=o.y-(o.k=='crate'?8:1)&&py<=o.y+o.h+1);
   if(t){sel=sel&&sel.k==t.k&&sel.i===t.i?null:t;return tipUI()}
   if(!sel)return;
@@ -584,6 +587,7 @@ cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),px=(e.clientX
   const pos={x:nx,y:ny};if(sel.k=='crate')st.lay.crate[sel.i]=pos;else if(sel.k=='bean')st.lay.bean[sel.i]=pos;else st.lay[sel.k]=pos;sel=null;return tipUI()}
  const qa=cust.find(c=>c.st=='ask'&&Math.abs(c.x-px)<8&&py>c.y-32&&py<c.y+3);if(qa)return openQ(qa);
  const pt=pets.find(p=>Math.abs(p.x-px)<7&&py>p.y-12&&py<p.y+3);if(pt)return openPet(pt.k);
+ if(walkOn&&walkClick(px,py))return;
  const c=cust.filter(c=>!c.hide).find(c=>Math.abs(c.x-px)<6&&py>c.y-18&&py<c.y+2);
  if(c){st.flags.tap=1;if(c.del)return toast('Delivery drone dropping off a crate.',1);const r=c.reg&&REGS.find(x=>x.id==c.reg);return toast(`${r?r.n+' (regular)':{robot:'Robot',cyborg:'Cyborg',human:'Human'}[c.kind]||'Shopper'}: ${c.g.n} fan looking for ${c.f.n}${c.alb>=0?`, buying ${albT(c.alb)}`:''}. ${STATUS[c.st]||''}`,1)}
  if(px>4&&px<62&&py>80&&py<107)return toast(`That's you at the register.${queue.length?` ${queue.length} in line.`:''}`,1);
@@ -680,7 +684,7 @@ function exportSave(){save();try{const b=new Blob([JSON.stringify(st)],{type:'ap
 $('#impF').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];e.target.value='';if(!file)return;const rd=new FileReader();
  rd.onload=()=>{let s=null;try{s=JSON.parse(rd.result)}catch(err){}
   if(!s||s.v!=6||typeof s.m!='number'||!s.slots||!s.stock){toast('That is not a Groove Tycoon save file.',1);return}
-  if(cut)endCut();st=s;party=null;cust=[];queue=[];floats=[];evQ=[];curEv=null;arranging=false;sel=null;if(modal)ovClose();paused=!!st.over;save();toast(`Loaded ${st.name}, ${dateStr(st.m)}.`,1);renderTab()};
+  if(cut)endCut();st=s;party=null;walkOn=false;scene='in';cust=[];queue=[];floats=[];evQ=[];curEv=null;arranging=false;sel=null;if(modal)ovClose();paused=!!st.over;save();toast(`Loaded ${st.name}, ${dateStr(st.m)}.`,1);renderTab()};
  rd.readAsText(file)});
 /* ---------- records: sleeves, bags, the record wall ---------- */
 function sleeve(x,y,c,d){R(x,y,5,5,c);if(d%2){R(x+1,y+1,3,3,'#111');Rf(x+2,y+2,1,1,c)}else{R(x,y+3,5,1,'#111');Rf(x+1,y+1,1,1,'rgba(255,255,255,.5)')}Rf(x,y,5,T,'rgba(255,255,255,.35)');Rf(x+5,y+T,T,5,'rgba(0,0,0,.4)')}
@@ -776,9 +780,115 @@ function tParty(){const k=K(),used=!!st.done['p'+st.m],R0=relAlbs();let h=`<p cl
  h+=`<div class="cards"><div class="card"><h3>Record store party</h3><p>DJ, lasers, cheap synth-caf. Everyone in the city is invited. +${PARTY.store.rep} rep.</p><div class="ft"><span>${money(c1)}</span><button data-a="party:store"${dis(c1)}>Throw it</button></div></div>
  <div class="card"><h3>Album release party</h3><p>Launch a new album at midnight. Its fans turn up in force, it sells like crazy, and its genre stays hot all month. +${PARTY.release.rep} rep.</p>${R0.length?`<select id="relSel" aria-label="Album">${R0.map(i=>`<option value="${i}">${esc(albT(i))} · ${esc(albA(i))} (${ALB[i][2]})</option>`).join('')}</select>`:'<p class="note">No new albums (this year or last) in the genres you stock.</p>'}<div class="ft"><span>${money(c2)}</span><button data-a="party:release"${R0.length?dis(c2):' disabled'}>Throw it</button></div></div></div>`;
  return h}
+/* ---------- walking: inside the shop and out on the canal ---------- */
+let walkOn=false,scene='in',keys={},camX=0,strl=[],strT=0,bikes=[],bikeT=0;
+const pl={x:26,y:96,path:[],pend:null,dir:1,walk:0,moving:false,sit:0,warn:0};
+const REG={x:26,y:96},DOOR_IN={x:238,y:99},SW=600,DOORX=325;
+const SPOTS=[{id:'door',x:DOORX,y:103,y0:64,y1:106,tip:'Tap the door to go back inside.'},{id:'cart',x:130,y:106,y0:84,y1:116,tip:'Tap the cart for a stroopwafel.'},{id:'bench',x:420,y:110,y0:102,y1:122,tip:'Tap the bench to sit for a moment.'},{id:'board',x:505,y:105,y0:80,y1:112,tip:'Tap the notice board to put up flyers (once a month).'}];
+const atReg=()=>!walkOn||st.staff.clerk>0||(scene=='in'&&Math.hypot(pl.x-REG.x,pl.y-REG.y)<6);
+function toggleWalk(){walkOn=!walkOn;keys={};Object.assign(pl,{x:REG.x,y:REG.y,path:[],pend:null,sit:0,warn:0});scene='in';
+ if(walkOn){if(arranging)setArr(false);toast(st.staff.clerk?'Walk mode: your clerk bots cover the register.':'Walk mode: nobody gets served while you are away from the register!',1)}spdUI()}
+function inOK(x,y){return(y>=99&&y<=142&&x>=6&&x<=244)||(y>=95&&y<99&&x>=8&&x<=66)}
+const outOK=(x,y)=>x>=6&&x<=SW-6&&y>=102&&y<=122;
+function walkTo(tx,ty,pend){pl.pend=pend||null;pl.sit=0;
+ if(scene=='out'){pl.path=[{x:Math.max(6,Math.min(SW-6,tx)),y:Math.max(102,Math.min(122,ty))}];return}
+ const lane=y=>y<99,toLane=ty<99&&tx<64,from=lane(pl.y);let t=toLane?{x:Math.max(8,Math.min(60,tx)),y:96}:{x:Math.max(6,Math.min(244,tx)),y:Math.max(99,Math.min(142,ty))};
+ if(pend=='exit')t={x:DOOR_IN.x,y:DOOR_IN.y};
+ pl.path=from&&!toLane?[{x:64,y:96},{x:66,y:100},t]:!from&&toLane?[{x:66,y:100},{x:64,y:96},t]:[t]}
+function arrive(){const p=pl.pend;pl.pend=null;if(!p)return;
+ if(p=='exit')return goOut();
+ if(p.k=='crate'){const id=st.slots[p.i];if(!id)return toast('Empty crate. Pick a genre for it in the Stock tab.',1);const c=crateCost();if(st.cash<c)return toast('Not enough cash to restock.',1);buyCrate(id,1);toast(`You restock the ${GI[id].n} crate (+50).`,1);renderTab()}
+ if(p.k=='spot')doSpot(p.id)}
+function goOut(){scene='out';Object.assign(pl,{x:DOORX,y:104,path:[],pend:null});keys={};toast('You step out onto the canal.',1);tipUI()}
+function goIn(){scene='in';Object.assign(pl,{x:DOOR_IN.x,y:DOOR_IN.y+1,path:[],pend:null});keys={};tipUI()}
+function doSpot(id){const k=K();
+ if(id=='door')return goIn();
+ if(id=='cart'){const c=3*k;if(st.cash<c)return toast('Not even enough for a stroopwafel...',1);st.cash-=c;floats.push({x:pl.x,y:pl.y-22,t:'h',c:'#ffb24f',life:1.4,out:1});return toast('A warm stroopwafel. Caramel everywhere. Worth it.',1)}
+ if(id=='bench'){pl.sit=4;return toast('You sit and watch the boats drift by.',1)}
+ if(id=='board'){if(st.done['fly'+st.m])return toast('Your flyers are already up this month.',1);const c=40*k;if(st.cash<c)return toast('Not enough cash to print flyers.',1);st.cash-=c;st.done['fly'+st.m]=1;st.fx.push({k:'visits',v:1.1,until:st.m+1});st.rep=Math.min(100,st.rep+1);toast(`Flyers up (${money(c)}). More shoppers this month, +1 rep.`,1);renderTab()}}
+function nearSpot(){return SPOTS.find(s=>Math.abs(s.x-pl.x)<12&&Math.abs(s.y-pl.y)<10)}
+function walkTip(){if(queue.length&&!atReg())return'A customer is waiting at the register! Tap the counter to go back.';
+ if(scene=='out'){const s=nearSpot();return s?s.tip:'Strolling along the canal. Tap anywhere to walk (or use the arrow keys).'}
+ return'Tap the floor to walk. Tap a crate to restock it, the counter to serve, or the door to step outside.'}
+function walkClick(px,py){
+ if(px>222&&py>26&&py<100){walkTo(DOOR_IN.x,DOOR_IN.y,'exit');return true}
+ if(px>=4&&px<=62&&py>=78&&py<=107){walkTo(REG.x,REG.y);return true}
+ const cr=things().find(o=>o.k=='crate'&&px>=o.x-2&&px<=o.x+o.w+2&&py>=o.y-8&&py<=o.y+o.h+1);
+ if(cr){const sp=spot.crate(cr.i);walkTo(sp.x,Math.min(142,sp.y+3),{k:'crate',i:cr.i});return true}
+ walkTo(px,py);return true}
+function streetClick(px,py){if(!walkOn)return;const wx=px+camX,s=SPOTS.find(s=>Math.abs(s.x-wx)<12&&py>=s.y0&&py<=s.y1);
+ if(s){if(Math.abs(s.x-pl.x)<12&&Math.abs(s.y-pl.y)<10)return doSpot(s.id);return walkTo(s.x,s.y,{k:'spot',id:s.id})}walkTo(wx,py)}
+function interact(){if(scene=='out'){const s=nearSpot();if(s)doSpot(s.id);return}
+ if(Math.hypot(pl.x-DOOR_IN.x,pl.y-DOOR_IN.y)<12)return goOut();
+ const cr=things().find(o=>o.k=='crate'&&Math.hypot(spot.crate(o.i).x-pl.x,spot.crate(o.i).y-pl.y)<12);if(cr){pl.pend={k:'crate',i:cr.i};arrive()}}
+function updPlayer(dt){const sp=34*dt,ok=scene=='out'?outOK:inOK,kx=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0),ky=(keys.ArrowDown?1:0)-(keys.ArrowUp?1:0);
+ if(pl.sit>0)pl.sit-=dt;
+ if(queue.length&&!atReg()){if(!pl.warn){pl.warn=1;toast('A customer is waiting at the register!',1);tipUI()}}else if(pl.warn){pl.warn=0;tipUI()}
+ if(kx||ky){pl.path=[];pl.pend=null;pl.sit=0;const nx=pl.x+kx*sp,ny=pl.y+ky*sp;if(ok(nx,ny)){pl.x=nx;pl.y=ny}else if(ok(nx,pl.y))pl.x=nx;else if(ok(pl.x,ny))pl.y=ny;pl.moving=true;pl.walk+=dt;
+  if(scene=='in'&&ky<0&&pl.x>=228&&pl.y<=99.5)goOut();else if(scene=='out'&&ky<0&&Math.abs(pl.x-DOORX)<8&&pl.y<=102.5)goIn();return}
+ if(pl.path.length){const t=pl.path[0],dx=t.x-pl.x,dy=t.y-pl.y,d=Math.hypot(dx,dy);if(d<=sp){pl.x=t.x;pl.y=t.y;pl.path.shift();if(!pl.path.length){pl.moving=false;arrive();tipUI()}}else{pl.x+=dx/d*sp;pl.y+=dy/d*sp}pl.moving=pl.path.length>0;pl.walk+=dt}else pl.moving=false}
+document.addEventListener('keydown',e=>{if(!walkOn||modal||cut||/INPUT|SELECT/.test(e.target.tagName))return;if(e.key.startsWith('Arrow')){keys[e.key]=1;e.preventDefault()}else if(e.key=='e'||e.key=='E')interact()});
+document.addEventListener('keyup',e=>{delete keys[e.key]});
+window.addEventListener('blur',()=>{keys={}});
+
+/* ---------- the canal street ---------- */
+function rndLook(){return{kind:pick(['robot','cyborg','human','human','human']),skin:pick(SK),shirt:pick(Math.random()<.5?SH70:SH80),pants:pick(PA),hair:pick(HC),shell:pick(SHELL),glow:pick(GLOW),implant:Math.random()<.5,style:pick(G).hair}}
+function updStreet(dt){
+ if((strT-=dt)<=0){strT=1.2+Math.random()*2.4;const d=Math.random()<.5?1:-1;strl.push({...rndLook(),x:d>0?-8:SW+8,y:103+Math.random()*18,d,v:12+Math.random()*8,shop:Math.random()<.3,walk:0,moving:true})}
+ for(const s of strl){if(s.shop&&Math.abs(s.x-DOORX)<2){s.y-=s.v*dt;if(s.y<101)s.gone=1}else{s.x+=s.d*s.v*dt;if(s.shop&&Math.sign(DOORX-s.x)!=s.d)s.x=DOORX}s.walk+=dt}
+ strl=strl.filter(s=>!s.gone&&s.x>-12&&s.x<SW+12);
+ if((bikeT-=dt)<=0){bikeT=.8+Math.random()*2;const d=Math.random()<.5?1:-1;bikes.push({x:d>0?-10:SW+10,d,v:45+Math.random()*25,c:pick(['#ff4fd8','#4ff3ff','#ffb24f','#e8e4dc','#c6ff4f']),look:rndLook()})}
+ for(const b of bikes)b.x+=b.d*b.v*dt;bikes=bikes.filter(b=>b.x>-14&&b.x<SW+14)}
+const HOUSES=(()=>{const a=[];let x=-4,i=0;while(x<SW){if(x>=252&&x<346){x=346;continue}let w=30+(i*7)%14;if(x<252&&x+w>252)w=252-x;if(x<252&&252-(x+w)<20&&252-(x+w)>0)w=252-x;a.push({x,w,top:10+(i*13)%18,c:HOUSE[(i*5)%HOUSE.length],g:i%3,i});x+=w;i++}return a})();
+function house(h,night,dusk){const{x,w,top,c,g,i}=h,light=c=='#e8dcc0',tr=light?'#7a6a5a':'#e8e4dc';
+ R(x,top,w,100-top,c);Rf(x+w-1,top,1,100-top,'rgba(0,0,0,.25)');R(x,top,w,1,tr);
+ if(g==0){R(x+3,top-4,w-6,4,c);R(x+7,top-8,w-14,4,c);R(x+11,top-11,w-22,3,c)}else if(g==1){R(x+5,top-7,w-10,7,c);R(x+8,top-12,w-16,5,c);R(x+4,top-7,2,2,tr);R(x+w-6,top-7,2,2,tr)}else for(let k=1;k<w/2;k++)R(x+k,top-k,w-2*k,1,c);
+ R(x+(w>>1)-1,top-(g==2?w>>1:g==1?12:11)-2,2,3,'#1a1a1a');
+ const cols=Math.max(1,Math.floor((w-4)/10));for(let wy=top+5;wy<78;wy+=14)for(let cI=0;cI<cols;cI++){const wx=x+3+cI*((w-6)/cols)+((w-6)/cols-6)/2|0,lit=night&&((wx*3+wy+i)%3);
+  R(wx-1,wy-1,8,11,tr);R(wx,wy,6,9,lit?'#ffd27a':dusk?'#c88aa0':'#7fa8c0');R(wx+3,wy,1,9,tr);R(wx,wy+4,6,1,tr);if(!lit)Rf(wx,wy,2,T,'rgba(255,255,255,.4)')}
+ if(i%4==1){R(x+3,82,w-6,3,['#c83a3a','#3a5a9a','#2f6a4a'][i%3]);for(let k=0;k<w-6;k+=4)R(x+3+k,85,2,1,['#c83a3a','#3a5a9a','#2f6a4a'][i%3]);R(x+4,86,w-16,13,night?'rgba(255,210,122,.55)':'rgba(140,190,220,.5)')}
+ R(x+w-11,85,7,15,'#2a1a14');R(x+w-12,84,9,1,tr);Rf(x+w-6,92,T*2,T*2,'#e0c060');R(x+w-12,99,9,1,'#6a6a72')}
+function shopFront(night){const x=252,w=94,E=ERA[yF()<2075?0:yF()<2080?1:yF()<2085?2:3];
+ R(x,12,w,88,'#141a2e');R(x+4,8,w-8,4,'#141a2e');R(x+10,4,w-20,4,'#141a2e');R(x,12,w,1,E.n);
+ for(let r=0;r<2;r++)for(let c=0;c<5;c++){const wx=x+7+c*17,wy=17+r*13;R(wx,wy,9,9,'#2a3446');R(wx+1,wy+1,7,7,night||party?'#ffd27a':'#5a7fa0');R(wx+4,wy+1,1,7,'#2a3446')}
+ R(x+6,44,w-12,12,'#05060c');R(x+6,44,w-12,T,E.n);R(x+6,56-T,w-12,T,E.n);
+ cx.font='6px "Press Start 2P",monospace';cx.textAlign='center';cx.textBaseline='middle';cx.shadowColor=st.up.neon?'#ff4fd8':E.n;cx.shadowBlur=4*SC;cx.fillStyle=st.up.neon?'#ffd1f4':'#c8f8ff';cx.fillText(st.name.toUpperCase().slice(0,14),x+w/2,50.5);cx.shadowBlur=0;
+ for(let k=0;k<w-8;k+=6){R(x+4+k,58,3,4,'#ff4fd8');R(x+7+k,58,3,4,'#e8f4ff')}
+ R(x+6,62,52,36,'#0a0e1c');R(x+7,63,50,34,party?'rgba(255,79,216,.35)':'rgba(255,200,120,.28)');const A=wallAlbs();for(let i=0;i<4;i++)cover(x+10+i*12,74,9,A[(i*5+st.m)%A.length],i);R(x+6,86,52,2,'#2a3446');
+ R(x+42,66,13,5,'#05060c');cx.font='3px "Press Start 2P",monospace';cx.fillStyle=(tP*2|0)%4?'#ff4f6a':'#5a1a2a';cx.fillText('OPEN',x+48.5,68.8);
+ R(DOORX-8,64,16,36,'#2a3446');R(DOORX-6,66,12,33,'rgba(120,220,255,.25)');R(DOORX-6,66,12,T,'#9fefff');R(DOORX+3,81,1,4,'#c8d0dc');R(DOORX-9,99,18,1,'#7a8aa0')}
+function drawStreet(){const f=party?.93:st.mt/MONTH,night=f>.72,dusk=f>.6;camX=Math.max(0,Math.min(SW-256,Math.round(pl.x-128)));
+ R(0,0,256,40,sky(f));if(night)for(let i=0;i<14;i++)R((i*37)%256,(i*11)%22+2,1,1,'#fff');
+ cx.save();cx.translate(-camX,0);
+ for(const h of HOUSES)house(h,night,dusk);shopFront(night);
+ R(0,100,SW,24,'#5c5c64');for(let x=0;x<SW;x+=12)R(x,100,1,24,'#4e4e56');R(0,111,SW,1,'#4e4e56');Rf(0,100,SW,T,'rgba(255,255,255,.2)');
+ R(0,124,SW,2,'#8a8a92');R(0,126,SW,7,'#8a3a36');for(let x=0;x<SW;x+=10)R(x,129,5,T*2,'rgba(255,255,255,.35)');R(0,133,SW,2,'#4a4a52');
+ R(0,135,SW,9,night?'#0e1630':dusk?'#3a2a50':'#2a4a5a');for(let i=0;i<40;i++)R(((i*31+tP*6)%SW),136+(i*5)%8,4,T,'rgba(255,255,255,.18)');
+ R(370,139,72,5,'#2a3a2a');R(372,138,68,1,'#4a5a3a');R(380,131,48,7,'#c8a060');R(378,130,52,1,'#7a4a22');for(let k=0;k<5;k++)R(384+k*9,133,5,3,night?'#ffd27a':'#7fa8c0');[[392,'#ff4f6a'],[404,'#ffe24f'],[416,'#c6ff4f']].forEach(([px,c])=>{R(px,127,3,3,'#3a8a4a');R(px,126,2,1,c)});
+ const items=[];
+ const tree=x=>items.push({b:124,f:()=>{R(x,98,2,26,'#3a2a20');R(x-8,76,18,14,'#2f5a3a');R(x-5,72,12,6,'#3a6a44');R(x-10,82,6,8,'#2a4a30');R(x+6,80,6,9,'#2a4a30');Rf(x-6,76,8,T,'rgba(255,255,255,.15)')}});
+ const lamp=x=>items.push({b:124,f:()=>{R(x,78,1,46,'#2a2a32');R(x-2,76,5,2,'#2a2a32');R(x-1,78,3,1,night?'#ffe9a8':'#9a9aa2')}});
+ [20,200,372,560].forEach(tree);[95,236,452,580].forEach(lamp);
+ items.push({b:113,f:()=>{const x=118;R(x,100,24,12,'#c8d0dc');R(x,100,24,1,'#fff');R(x+2,103,20,5,'#ffb24f');R(x+3,104,4,3,'#c8803a');R(x+9,104,4,3,'#c8803a');R(x+15,104,4,3,'#c8803a');R(x+2,112,2,1,'#222');R(x+20,112,2,1,'#222');R(x+11,84,1,16,'#888');for(let k=0;k<11;k++)R(x+1+k*2,82+Math.abs(k-5)*.4|0,2,3,k%2?'#ff4fd8':'#e8f4ff');person(x+30,108,{kind:'human',style:'cap',hair:'#2a1a10',skin:'#c68642',shirt:'#ffb24f',pants:'#2a3446',apron:1})}});
+ items.push({b:118,f:()=>{const x=408;R(x,111,24,2,'#7a4a22');R(x,108,24,2,'#7a4a22');R(x+1,113,1,5,'#222');R(x+22,113,1,5,'#222')}});
+ items.push({b:112,f:()=>{const x=496;R(x+2,96,1,16,'#2a2a32');R(x+16,96,1,16,'#2a2a32');R(x,82,19,14,'#3a4458');R(x+1,83,17,12,'#e8dcc0');[['#ff4fd8',2,84],['#4ff3ff',9,85],['#c6ff4f',3,90],['#ffb24f',11,90]].forEach(([c,ox,oy])=>R(x+ox,oy,5,4,c));if(st.done['fly'+st.m]){R(x+7,86,6,6,'#141824');R(x+8,87,4,2,'#ff4fd8')}}});
+ for(let x=200;x<SW;x+=130)items.push({b:122,f:()=>{R(x,118,4,4,'#1a1a1a');R(x+8,118,4,4,'#1a1a1a');R(x+2,116,8,1,'#c83a3a');R(x+3,113,1,3,'#555')}});
+ for(const s of strl)items.push({b:s.y,f:()=>person(s.x,s.y,s)});
+ items.push({b:pl.y,f:()=>{const sit=pl.sit>0;person(pl.x,pl.y-(sit?2:0),{...OWN,moving:pl.moving,walk:pl.walk})}});
+ items.sort((a,b)=>a.b-b.b).forEach(i=>i.f());
+ for(const b of bikes){const x=Math.round(b.x);R(x-4,130,3,3,'#1a1a1a');R(x+2,130,3,3,'#1a1a1a');R(x-3,128,7,1,'#555');R(x-1,125,3,3,b.c);person(x,127,{...b.look,moving:false})}
+ cx.save();cx.globalCompositeOperation='lighter';glow(DOORX-40,80,40,party?'rgba(255,79,216,A)':'rgba(255,200,120,A)',.12+(night?.1:0));glow(299,50,44,st.up.neon?'rgba(255,79,216,A)':'rgba(79,243,255,A)',.12);
+ if(night)[95,236,452,580].forEach(x=>glow(x,80,30,'rgba(255,233,168,A)',.18));cx.restore();
+ if(party)for(let i=0;i<4;i++)glyph('n',(DOORX-10+i*7+Math.sin(tP*2+i)*3)|0,(60-((tP*12+i*9)%26))|0,['#ff4fd8','#4ff3ff','#c6ff4f','#ffb24f'][i]);
+ for(const fl of floats)if(fl.out)txt(fl.t,fl.x-fl.t.length*2,fl.y|0,fl.c);
+ cx.restore();
+ if(rainy())for(let i=0;i<40;i++)Rf((i*53+tP*20)%256,(i*97+tP*120)%150-6,T,3,'rgba(180,210,255,.45)');
+ if(f>.6)R(0,0,256,144,`rgba(10,5,40,${(Math.min(1,(f-.6)/.3)*.3).toFixed(3)})`);
+ const v=cx.createRadialGradient(128,80,60,128,80,170);v.addColorStop(0,'rgba(0,0,10,0)');v.addColorStop(1,'rgba(0,0,10,.35)');cx.fillStyle=v;cx.fillRect(0,0,256,144);
+ cx.fillStyle='rgba(0,0,0,.10)';for(let yy=T*2;yy<144;yy+=1)cx.fillRect(0,yy,256,T)}
 let last=performance.now(),uiT=0;
 function loop(t){const dt=Math.min(.05,(t-last)/1000);last=t;tP+=dt;
- if(cut){walk(dt);cut.t+=dt;cut.ch=Math.min(cutLine()[1].length,cut.ch+dt*40);cutUI();drawCut()}else{if(!paused&&!modal&&!arranging&&!st.over)sim(dt*speed);anim(dt*(paused?0:speed));draw()}hud();
+ if(cut){walk(dt);cut.t+=dt;cut.ch=Math.min(cutLine()[1].length,cut.ch+dt*40);cutUI();drawCut()}else{if(!paused&&!modal&&!arranging&&!st.over)sim(dt*speed);anim(dt*(paused?0:speed));if(walkOn&&!modal&&!arranging)updPlayer(dt);if(scene=='out'){updStreet(dt);drawStreet()}else draw()}hud();
  if((uiT+=dt)>1.5){uiT=0;checkGoals();const ae=document.activeElement;if(!ae||ae.tagName!='SELECT')renderTab()}
  requestAnimationFrame(loop)}
 st=fresh();st.yr={sold:0,rev:0,genre:{},streak:0,bestStreak:0};renderTab();intro();requestAnimationFrame(loop);
