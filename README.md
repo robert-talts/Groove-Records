@@ -35,7 +35,7 @@ More to find:
 - **Decor:** buy the **Interior designer** upgrade, then pick wallpaper and neon themes at the top of the Shop tab.
 - **Aliens:** they now shop and stroll among the humans, robots and cyborgs.
 - **The robbery:** happens once. Buy the **Pistol** (Shop tab) and you can shoot the robber, a security mech can tackle him, or you hand over the cash.
-- **Bike lane:** cyclists and skateboarders, and the occasional spectacular crash and fireball.
+- **Bike lane:** cyclists and skateboarders, and about once per in-game day (one month) somebody wipes out and sits there seeing stars.
 - **De Wallen:** the red light district stretch of the canal.
 - **Fishing:** buy a **Fishing rod**, tap the canal and tap again when you see "!". Your catch is sold on the spot.
 - **Houseboat:** buy it, then tap it to go aboard (nap, music, galley) or take the wheel and cruise the canal.

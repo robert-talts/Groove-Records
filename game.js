@@ -1184,13 +1184,12 @@ function robEvent(){const take=Math.round(Math.min(Math.max(0,st.cash)*.3,2500*K
  if(!st.up.gun&&!st.staff.guard)o.push({l:'Refuse and stare him down',f:()=>{robber.st='flee';robber.t=0;if(Math.random()<.5)return'He loses his nerve and bolts. You\'re shaking, but the till is safe. (Maybe buy a pistol in the Shop tab.)';const id=st.slots.find(q=>q&&st.stock[q]>15);if(id)st.stock[id]-=15;return`He shoves you, grabs an armful of records and runs.`}});
  queueEv({t:'Robbery!',x:'A man in a ski mask walks up to the counter and pulls a gun. "The cash. Now. Nobody gets hurt."',o})}
 /* ---------- bike lane: skaters, crashes and fires ---------- */
-let fires=[],crashT=6,shakeT=0;
-function laneSim(dt){if((crashT-=dt)<=0){crashT=6+Math.random()*8;const vis=bikes.filter(b=>!b.crash&&Math.abs(b.x-(camX+128))<115);if(vis.length){const b=pick(vis);Object.assign(b,{crash:1,ct:0,rx:b.x,ry:127,vx:b.d*28,vy:-42});fires.push({x:b.x,t:0});boom()}}
+let fires=[],crashT=4+Math.random()*12,shakeT=0;
+function laneSim(dt){if(!st.done['crash'+st.m]&&(crashT-=dt)<=0){crashT=4+Math.random()*12;const vis=bikes.filter(b=>!b.crash&&Math.abs(b.x-(camX+128))<115);if(vis.length){const b=pick(vis);Object.assign(b,{crash:1,ct:0,rx:b.x,ry:127,vx:b.d*22,vy:-34});st.done['crash'+st.m]=1;beep(160,.08);beep(110,.1,.06)}}
  for(const b of bikes)if(b.crash){b.ct+=dt;if(b.ry<121||b.vy<0){b.rx+=b.vx*dt;b.vy+=95*dt;b.ry+=b.vy*dt;if(b.ry>=121&&b.vy>0){b.ry=121;b.vy=0}}if(b.ct>3.2&&!b.off){b.off=1;strl.push({...b.look,x:b.rx,y:121,d:-b.d,v:9,shop:false,walk:0,moving:true})}}
  for(const f of fires)f.t+=dt;fires=fires.filter(f=>f.t<3.6)}
-function boom(){shakeT=.4;if(sound&&ac){beep(70,.4);beep(45,.5,.05);try{const t=ac.currentTime,src=ac.createBufferSource(),g=ac.createGain();src.buffer=nb;src.loop=true;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.6);src.connect(g).connect(ac.destination);src.start(t);src.stop(t+.6)}catch(e){}}}
 function drawLane(b){const x=Math.round(b.x);
- if(b.crash){R(x-5,131,4,2,'#1a1a1a');R(x+2,130,3,3,'#1a1a1a');R(x-3,129,6,1,'#444');Rf(x-2,128,4,T,'#ff8a1a');
+ if(b.crash){R(x-5,131,4,2,'#1a1a1a');R(x+2,130,3,3,'#1a1a1a');R(x-3,129,6,1,'#444');
   if(!b.off){if(b.ry<121||b.vy<0){cx.save();cx.translate(b.rx,b.ry-6);cx.rotate(b.ct*9*b.d);person(0,6,{...b.look,spr:undefined});cx.restore()}else{person(b.rx,b.ry,{...b.look,spr:undefined});for(let i=0;i<3;i++)glyph('+',Math.round(b.rx-1+Math.cos(tP*5+i*2.1)*4),Math.round(b.ry-21+Math.sin(tP*5+i*2.1)*1.5),'#ffe24f')}}return}
  if(b.kind=='skate'){R(x-4,131,9,1,'#c83a3a');Rf(x-4,131,9,T,'rgba(255,255,255,.3)');R(x-3,132,1,1,'#ddd');R(x+3,132,1,1,'#ddd');person(x,131,{...b.look,moving:false})}
  else{R(x-4,130,3,3,'#1a1a1a');R(x+2,130,3,3,'#1a1a1a');R(x-3,128,7,1,'#555');R(x-1,125,3,3,b.c);person(x,127,{...b.look,spr:undefined,moving:false})}}
