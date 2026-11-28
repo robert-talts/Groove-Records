@@ -28,6 +28,20 @@ Further along the canal:
 - **The Lucky 7:** a mafia casino with a poker room, blackjack (dealer stands on 17, blackjack pays 3 to 2) and Don Vinnie's booth.
 - **Loans:** Don Vinnie lends money with zero interest (for now). Borrow or repay at his booth. If you would go bankrupt, he turns up with a rescue loan instead.
 
+More to find:
+
+- **DJ Fennec:** hire the fox-head DJ (Staff tab) and he plays at his own turntable booth, and shoppers dance. You can rename him.
+- **Pets:** research the **Pet Auto-Feeder** and a little robot keeps Biscuit and Pixel fed.
+- **Decor:** buy the **Interior designer** upgrade, then pick wallpaper and neon themes at the top of the Shop tab.
+- **Aliens:** they now shop and stroll among the humans, robots and cyborgs.
+- **The robbery:** happens once. Buy the **Pistol** (Shop tab) and you can shoot the robber, a security mech can tackle him, or you hand over the cash.
+- **Bike lane:** cyclists and skateboarders, and the occasional spectacular crash and fireball.
+- **De Wallen:** the red light district stretch of the canal.
+- **Fishing:** buy a **Fishing rod**, tap the canal and tap again when you see "!". Your catch is sold on the spot.
+- **Houseboat:** buy it, then tap it to go aboard (nap, music, galley) or take the wheel and cruise the canal.
+- **Romance:** Mira (barista), Nova-9 (android musician) and Zara (alien jazz singer) hang out on the canal street. Chat, give gifts, go on dates, and maybe become partners. Their lines live in `dialogue.js`, so you can edit them or add new characters.
+- **The Lucky 7:** Texas Hold'em against three wiseguys, working slot machines, and blackjack.
+
 Career ranks (goals completed): Garage Hopeful, Underground Upstart (3), Scene Staple (7), Cult Favourite (12), Regional Sensation (18), National Headliner (25), Galactic Superstar (33), Hall of Famer (42).
 
 ## Saving
@@ -38,6 +52,7 @@ The game autosaves to your browser every in-game month, and **Continue** appears
 
 - `index.html`: page layout
 - `style.css`: styles
+- `dialogue.js`: romance characters and everything they say (easy to edit)
 - `sprites.png`: the pixel-art sprites the game uses (see Credits)
 - `game.js`: all the game logic and pixel-art drawing. The world uses a 256×144 pixel grid, drawn at 3× (768×432) so lighting, shading and fine details can sit between the big pixels.
 
