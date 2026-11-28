@@ -4,12 +4,19 @@ const $=s=>document.querySelector(s);
 const cv=$('#scr'),cx=cv.getContext('2d'),SC=3;cx.setTransform(SC,0,0,SC,0,0);cx.imageSmoothingEnabled=false;
 /* Pixel art: pieces of BeeZeeBox's Cyberpunk City Exterior & Interiors tilesets (beezeebox.itch.io), combined into sprites.png */
 const SPR={"char0":[0,0,64,64],"char1":[65,0,64,64],"char2":[130,0,64,64],"char3":[0,65,64,64],"char4":[65,65,64,64],"sHotel":[130,65,7,32],"a_red0":[138,65,16,32],"a_red1":[155,65,16,32],"a_red2":[172,65,16,32],"a_cy0":[189,65,16,32],"a_cy1":[206,65,16,32],"a_cy2":[223,65,16,32],"a_gr0":[240,65,16,32],"a_gr1":[0,130,16,32],"a_gr2":[17,130,16,32],"a_bl0":[34,130,16,32],"a_bl1":[51,130,16,32],"a_bl2":[68,130,16,32],"a_pk0":[85,130,16,32],"a_pk1":[102,130,16,32],"a_pk2":[119,130,16,32],"a_or0":[136,130,16,32],"a_or1":[153,130,16,32],"a_or2":[170,130,16,32],"sClub":[187,130,9,31],"sFood":[197,130,9,31],"sEat247":[207,130,32,31],"sInn":[240,130,12,28],"sEat":[0,163,10,28],"sBar":[11,163,10,28],"arcade1":[22,163,14,27],"fish0":[37,163,30,25],"fish1":[68,163,30,25],"fish2":[99,163,30,25],"fish3":[130,163,30,25],"fish4":[161,163,30,25],"fish5":[192,163,30,25],"vendR":[223,163,14,21],"vend1":[238,163,14,20],"vend2":[0,192,14,20],"vend3":[15,192,14,20],"vend4":[30,192,14,20],"benchO":[45,192,42,19],"trash1":[88,192,10,15],"signOpen":[99,192,29,12],"sMarket":[129,192,39,11],"sShopping":[169,192,47,11],"sMart":[217,192,27,10],"plant2":[245,192,7,9],"plant1":[0,213,5,8]};
-const ATL=new Image();let atlOK=false;ATL.onload=()=>{atlOK=true};ATL.src='sprites.png?v=202611280956';
+const ATL=new Image();let atlOK=false;ATL.onload=()=>{atlOK=true};ATL.src='sprites.png?v=202611281000';
 function spr(n,x,y){const q=SPR[n];if(!atlOK||!q)return false;cx.drawImage(ATL,q[0],q[1],q[2],q[3],Math.round(x),Math.round(y),q[2],q[3]);return true}
 const sprW=n=>SPR[n]?SPR[n][2]:0;
 function chr(i,row,fr,x,y){const q=SPR['char'+i];cx.drawImage(ATL,q[0]+fr*16,q[1]+row*16,16,16,Math.round(x)-8,Math.round(y)-16,16,16)}
 function sprPerson(o,x,y){let row=0;const mv=o.moving;if(o.face!=null)row=o.face;else if(mv){const dx=(o.tx??o.x)-o.x,dy=(o.ty??o.y)-o.y;row=Math.abs(dx)>Math.abs(dy)?(dx<0?2:3):(dy<0?1:0)}
- Rf(x-4,y-T,8,1+T,'rgba(0,0,0,.32)');chr(o.spr,row,mv?((o.walk*8|0)%4):0,x,y)}
+ const fr=mv?((o.walk*8|0)%4):0;Rf(x-4,y-T,8,1+T,'rgba(0,0,0,.32)');chr(o.spr,row,fr,x,y);if(o.me)swag(row,fr,Math.round(x)-8,Math.round(y)-16)}
+const HEADT=[[0,1,0,1],[1,0,1,0],[1,0,1,0],[1,0,1,0]];
+function swag(row,fr,ox,oy){const t=oy+HEADT[row][fr],C='#111',B='#1c1c1c',G='#ffd24f',S='#05060c';
+ if(row==0){R(ox+4,t,8,1,C);R(ox+3,t+1,10,2,C);R(ox+2,t+3,12,1,B);Rf(ox+7,t+1,2,T*2,G);R(ox+4,t+6,3,2,S);R(ox+9,t+6,3,2,S);R(ox+7,t+6,2,1,S);Rf(ox+4+T,t+6+T,T,T,'#9fefff');Rf(ox+9+T,t+6+T,T,T,'#9fefff');
+  R(ox+5,t+9,1,1,G);R(ox+6,t+10,4,1,G);R(ox+10,t+9,1,1,G);Rf(ox+7.33,t+11,1.33,1,G)}
+ else if(row==1){R(ox+4,t,8,1,C);R(ox+3,t+1,10,3,C);R(ox+7,t+3,2,1,'#3a3a3a');Rf(ox+5,t+8,6,T*2,G)}
+ else if(row==2){R(ox+4,t,8,1,C);R(ox+3,t+1,9,2,C);R(ox+1,t+3,7,1,B);R(ox+5,t+6,3,2,S);Rf(ox+8,t+6,3,T*2,S);Rf(ox+5+T,t+6+T,T,T,'#9fefff');Rf(ox+5,t+8+T,4,T*2,G);R(ox+5,t+9,1,1,G)}
+ else{R(ox+4,t,8,1,C);R(ox+4,t+1,9,2,C);R(ox+8,t+3,7,1,B);R(ox+8,t+6,3,2,S);Rf(ox+5,t+6,3,T*2,S);Rf(ox+10+T,t+6+T,T,T,'#9fefff');Rf(ox+7,t+8+T,4,T*2,G);R(ox+10,t+9,1,1,G)}}
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const G=[
 {id:'rock',n:'Synthwave',c:'#ff4fd8',hair:'visor',k:[[2070,1],[2080,.85],[2089,.75]]},
@@ -544,7 +551,7 @@ function tvWall(){const x=196,y=71;R(x+10,y-3,2,3,'#555');R(x,y,24,15,'#111');R(
  for(let k=0;k<6;k++){const hh=2+Math.abs(Math.sin(tP*6+k*1.3))*6;Rf(x+2+k*1.5,y+13-hh,1,hh,`hsl(${(k*50+tP*80)%360},100%,60%)`)}
  const b=Math.abs(Math.sin(tP*5))>.5?1:0;R(x+15,y+4-b,2,2,'#ffd27a');R(x+14,y+6-b,4,4,'#ff4fd8');R(x+13+(b?0:4),y+6-b,1,3,'#ffd27a');R(x+14,y+10-b,1,3,'#ffd27a');R(x+17,y+10-b,1,3,'#ffd27a');
  Rf(x+1,y+1,22,T,'rgba(255,255,255,.2)');cx.font='2px "Press Start 2P",monospace';cx.textAlign='left';cx.textBaseline='middle';cx.fillStyle='#fff';const t='NOW PLAYING  \u266a  '+(st.slots.filter(Boolean).map(id=>GI[id].n).join('  \u266a  ')||'GROOVE TV');cx.save();cx.beginPath();cx.rect(x+1,y+13,22,2);cx.clip();cx.fillText(t,x+23-((tP*8)%(t.length*2+22)),y+14);cx.restore();R(x,y+13,24,T,'#333')}
-const OWN={kind:'cyborg',style:'visor',hair:'#5a3a1e',skin:'#f1c27d',shirt:'#ff8a3d',pants:'#2a3446',stache:1,spr:0};
+const OWN={kind:'cyborg',style:'visor',hair:'#5a3a1e',skin:'#f1c27d',shirt:'#ff8a3d',pants:'#2a3446',stache:1,spr:0,me:1};
 const CLK=[{kind:'robot',style:'',shell:'#7fa8c9',glow:'#4ff3ff'},{kind:'robot',style:'antennae',shell:'#e0c060',glow:'#ff4fd8'},{kind:'robot',style:'',shell:'#8ac0a0',glow:'#c6ff4f'}];
 const SKY=[[0,[120,200,255]],[.55,[90,150,230]],[.8,[255,110,170]],[1,[20,16,60]]];
 function sky(f){for(let i=1;i<SKY.length;i++)if(f<=SKY[i][0]){const a=SKY[i-1],b=SKY[i],t=(f-a[0])/(b[0]-a[0]);return`rgb(${a[1].map((v,j)=>Math.round(v+(b[1][j]-v)*t)).join(',')})`}return'rgb(20,16,60)'}
