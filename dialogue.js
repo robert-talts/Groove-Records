@@ -35,7 +35,7 @@ window.GT_DIALOGUE={
     {q:'"Is it strange that humans sleep?"',a:[['"We just reboot slowly."',6,'"Ha! I understand you now."'],['"Is it strange you don\'t?"',3,'"Touché."'],['"Don\'t get weird."',-3,'"Apologies."']]}],
    dates:{cafe:'"I cannot drink coffee, but I enjoyed watching you drink coffee."',casino:'"I counted every card. I did not tell anyone. For you."',boat:'"The water reflects the stars. I am recording this for eternity."'}},
   {id:'zara',name:'Zara',role:'Alien jazz singer from Kepler',x:948,y:112,likes:'jazz',
-   look:{kind:'alien',atype:'grey',askin:'#a89aff',asuit:'#5a2a4a'},
+   look:{kind:'alien'},
    lines:[
     ['"Earthling. Your planet\'s music is... adorable."','"I sing at clubs. Do not ask which ones."'],
     ['"You again. Do you sell Quantum Jazz? Real Quantum Jazz?"','"On my moon we hum with all three of our hearts."'],

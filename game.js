@@ -4,7 +4,7 @@ const $=s=>document.querySelector(s);
 const cv=$('#scr'),cx=cv.getContext('2d'),SC=3;cx.setTransform(SC,0,0,SC,0,0);cx.imageSmoothingEnabled=false;
 /* Pixel art: pieces of BeeZeeBox's Cyberpunk City Exterior & Interiors tilesets (beezeebox.itch.io), combined into sprites.png */
 const SPR={"char0":[0,0,64,64],"char1":[65,0,64,64],"char2":[130,0,64,64],"char3":[0,65,64,64],"char4":[65,65,64,64],"sHotel":[130,65,7,32],"a_red0":[138,65,16,32],"a_red1":[155,65,16,32],"a_red2":[172,65,16,32],"a_cy0":[189,65,16,32],"a_cy1":[206,65,16,32],"a_cy2":[223,65,16,32],"a_gr0":[240,65,16,32],"a_gr1":[0,130,16,32],"a_gr2":[17,130,16,32],"a_bl0":[34,130,16,32],"a_bl1":[51,130,16,32],"a_bl2":[68,130,16,32],"a_pk0":[85,130,16,32],"a_pk1":[102,130,16,32],"a_pk2":[119,130,16,32],"a_or0":[136,130,16,32],"a_or1":[153,130,16,32],"a_or2":[170,130,16,32],"sClub":[187,130,9,31],"sFood":[197,130,9,31],"sEat247":[207,130,32,31],"sInn":[240,130,12,28],"sEat":[0,163,10,28],"sBar":[11,163,10,28],"arcade1":[22,163,14,27],"fish0":[37,163,30,25],"fish1":[68,163,30,25],"fish2":[99,163,30,25],"fish3":[130,163,30,25],"fish4":[161,163,30,25],"fish5":[192,163,30,25],"vendR":[223,163,14,21],"vend1":[238,163,14,20],"vend2":[0,192,14,20],"vend3":[15,192,14,20],"vend4":[30,192,14,20],"benchO":[45,192,42,19],"trash1":[88,192,10,15],"signOpen":[99,192,29,12],"sMarket":[129,192,39,11],"sShopping":[169,192,47,11],"sMart":[217,192,27,10],"plant2":[245,192,7,9],"plant1":[0,213,5,8]};
-const ATL=new Image();let atlOK=false;ATL.onload=()=>{atlOK=true};ATL.src='sprites.png?v=202611280945';
+const ATL=new Image();let atlOK=false;ATL.onload=()=>{atlOK=true};ATL.src='sprites.png?v=202611280952';
 function spr(n,x,y){const q=SPR[n];if(!atlOK||!q)return false;cx.drawImage(ATL,q[0],q[1],q[2],q[3],Math.round(x),Math.round(y),q[2],q[3]);return true}
 const sprW=n=>SPR[n]?SPR[n][2]:0;
 function chr(i,row,fr,x,y){const q=SPR['char'+i];cx.drawImage(ATL,q[0]+fr*16,q[1]+row*16,16,16,Math.round(x)-8,Math.round(y)-16,16,16)}
@@ -535,7 +535,7 @@ function beanBack(i){const b=st.lay.bean[i],c=CHAIRC[i%5],h=hov(i);R(b.x+1,b.y-6
 function bean(i){const b=st.lay.bean[i],c=CHAIRC[i%5],h=hov(i),o=sitter(i);
  Rf(b.x+1,b.y+7,10,1,'rgba(0,0,0,.35)');Rf(b.x+3,b.y+5+h,6,T,'rgba(79,243,255,.9)');
  R(b.x,b.y+1+h,12,4,'#3a3458');R(b.x+1,b.y+1+h,10,1,c);Rf(b.x+1,b.y+1+h,10,T,'rgba(255,255,255,.35)');R(b.x-1,b.y-1+h,2,5,'#3a3458');R(b.x+11,b.y-1+h,2,5,'#3a3458');Rf(b.x-1,b.y-1+h,2,T,c);Rf(b.x+11,b.y-1+h,2,T,c);
- if(o){const x=b.x+6,y=b.y+4+h,pc=o.kind=='robot'?MDK:o.kind=='alien'?(o.askin||(o.atype=='grey'?'#b8c0c8':o.atype=='blob'?'#7dff8a':'#b48cff')):(o.pants||'#2a3446');R(x-3,y,2,2,pc);R(x+1,y,2,2,pc);R(x-3,y+2,2,1,'#111');R(x+1,y+2,2,1,'#111');
+ if(o){const x=b.x+6,y=b.y+4+h,pc=o.kind=='robot'?MDK:o.kind=='alien'?'#a8ff9a':(o.pants||'#2a3446');R(x-3,y,2,2,pc);R(x+1,y,2,2,pc);R(x-3,y+2,2,1,'#111');R(x+1,y+2,2,1,'#111');
   if(smokes(o)){Rf(x+2,y-6,3,T*2,'#f4f1e8');Rf(x+5,y-6,T*2,T*2,(tP*5+i|0)%2?'#ff8a3d':'#ffd27a')}}}
 function seated(c){const b=st.lay.bean[c.bean],h=hov(c.bean);cx.save();cx.beginPath();cx.rect(0,0,256,b.y+2+h);cx.clip();person(b.x+6,b.y+8+h,{...c,style:c.style||(c.g&&c.g.hair),moving:false,face:0});cx.restore()}
 const smokes=o=>((o.x*7+o.y*3)|0)%10<7;
@@ -1158,15 +1158,11 @@ const DECOR=[{id:'era',nm:'Follow the era'},{id:'navy',nm:'Neon Navy',...ERA[0],
 function decorPick(y){const e=y<2075?0:y<2080?1:y<2085?2:3,d=st.up.decor&&DECOR.find(q=>q.id==st.decor);return d&&d.w?[d.pat,d]:[e,ERA[e]]}
 
 /* ---------- aliens ---------- */
-const ASKIN=['#7dff8a','#a89aff','#6ae0ff','#c6ff4f'];
-function alienBody(o,x,y,s){const t=o.atype||(o.atype=pick(['grey','blob','squid']));
- if(t=='grey'){const sk=o.askin||'#b8c0c8',su=o.asuit||'#2a2a3a';R(x-1,y-4,1,4-s,sk);R(x+1,y-4,1,3+s,sk);R(x-2,y-9,4,5,su);Rf(x-2,y-9,4,T,'rgba(255,255,255,.2)');R(x-3,y-9,1,5,sk);R(x+2,y-9,1,5,sk);R(x-1,y-10,2,1,sk);
-  R(x-3,y-17,7,6,sk);R(x-4,y-16,9,3,sk);R(x-2,y-11,5,1,sk);R(x-3,y-15,3,2,'#05060c');R(x+1,y-15,3,2,'#05060c');R(x-2,y-13,1,1,'#05060c');R(x+2,y-13,1,1,'#05060c');Rf(x-3+T,y-15+T,T,T,'#9fefff');Rf(x+1+T,y-15+T,T,T,'#9fefff');Rf(x-3,y-17,7,T,'rgba(255,255,255,.35)');return}
- if(t=='blob'){const sk=o.askin||'#7dff8a',b=Math.round(Math.abs(Math.sin(tP*6+x))*(o.moving?2:.6));
-  Rf(x-4,y-T,8,1,'rgba(0,0,0,.3)');R(x-3,y-8-b,6,1,sk);R(x-4,y-7-b,8,6,sk);R(x-5,y-5-b,10,4,sk);Rf(x-3,y-7-b,2,2,'rgba(255,255,255,.45)');Rf(x-4,y-2-b,8,T*2,'rgba(0,80,30,.35)');
-  R(x,y-11-b,1,3,sk);R(x-1,y-14-b,3,3,'#fff');R(x,y-13-b,1,1,'#111');R(x-1,y-4-b,3,1,'#2a6a3a');return}
- const sk=o.askin||'#b48cff',dk='#7a4ac8';for(let i=0;i<4;i++)R(x-3+i*2,y-4,1,4-(((tP*8+i+x)|0)%2),i%2?dk:sk);
- R(x-3,y-12,7,8,sk);R(x-2,y-14,5,2,sk);R(x-1,y-15,3,1,sk);Rf(x-2,y-14,2,T,'rgba(255,255,255,.4)');R(x-2,y-10,1,1,'#ffe24f');R(x,y-11,1,1,'#ffe24f');R(x+2,y-10,1,1,'#ffe24f');R(x-1,y-7,1,1,dk);R(x+2,y-6,1,1,dk);R(x,y-5,1,1,dk)}
+function alienBody(o,x,y,s){const sk='#a8ff9a',dk='#6ac85a',su='#2a3a4a';
+ R(x-1,y-4,1,4-s,sk);R(x+1,y-4,1,3+s,sk);R(x-2,y-9,4,5,su);Rf(x-2,y-9,4,T,'rgba(255,255,255,.2)');R(x-3,y-9,1,5,sk);R(x+2,y-9,1,5,sk);R(x-1,y-10,2,1,sk);
+ R(x-3,y-17,7,6,sk);R(x-4,y-16,9,3,sk);R(x-2,y-11,5,1,sk);Rf(x-3,y-17,7,T,'rgba(255,255,255,.4)');Rf(x+3,y-16,1,4,dk);
+ R(x-3,y-15,3,2,'#05060c');R(x+1,y-15,3,2,'#05060c');R(x-2,y-13,1,1,'#05060c');R(x+2,y-13,1,1,'#05060c');Rf(x-3+T,y-15+T,T,T,'#e8fff0');Rf(x+1+T,y-15+T,T,T,'#e8fff0');
+ R(x-2,y-19,1,2,dk);R(x+2,y-19,1,2,dk);R(x-2,y-20,1,1,'#e8fff0');R(x+2,y-20,1,1,'#e8fff0')}
 
 /* ---------- the robbery ---------- */
 let robber=null;
